@@ -1,26 +1,181 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-dark-base: #2d2d2d;
+  --color-white-base: #faf9f6;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: #cfbeea;
+  --color-primary-50: #f2ebfd;
+  --color-secondary: #7f5ccc;
+
+  --color-body-light: #f9fafb;
+  --color-body-off: #e2e2e2;
+  --color-body-dark: #666666;
+
+  --color-error: #a80003;
+  --color-info: #4f4f4f;
+  --color-warning: #ad5c00;
+  --color-success: #005c28;
+
+  --font-sans: var(--font-satoshi);
+  --font-display: var(--font-cabinet-grotesk);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-white-base);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Typography scale */
+
+:root {
+  --hero-heading-font-size: 48px;
+  --section-title-font-size: 32px;
+  --section-inner-title-font-size: 24px;
+  --body-font-size: 16px;
+  --one-liner-font-size: 16px;
+  --small-font-size: 14px;
+  --extra-small-font-size: 12px;
+  --button-font-size: 18px;
+  --cta-band-heading-font-size: 32px;
+}
+
+@variant lg {
+  :root {
+    --hero-heading-font-size: 80px;
+    --section-title-font-size: 40px;
+    --section-inner-title-font-size: 30px;
+    --body-font-size: 18px;
+    --one-liner-font-size: 18px;
+    --small-font-size: 16px;
+    --extra-small-font-size: 14px;
+    --button-font-size: 20px;
+    --cta-band-heading-font-size: 40px;
+  }
+}
+
+/* Hero Heading — h1 */
+@utility text-hero {
+  font-family: var(--font-cabinet-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: var(--hero-heading-font-size);
+  line-height: 100%;
+  letter-spacing: -1px;
+}
+
+/* Section Title — h2 */
+@utility text-section-title {
+  font-family: var(--font-cabinet-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: var(--section-title-font-size);
+  line-height: 100%;
+  letter-spacing: -1px;
+}
+
+/* Section Inner Title — h3 */
+@utility text-section-inner-title {
+  font-family: var(--font-cabinet-grotesk), sans-serif;
+  font-weight: 500;
+  font-size: var(--section-inner-title-font-size);
+  line-height: 100%;
+  letter-spacing: -1px;
+}
+
+/* Body — p */
+@utility text-body-regular {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 400;
+  font-size: var(--body-font-size);
+  line-height: 150%;
+  letter-spacing: 0.01em;
+}
+
+/* Body — p */
+@utility text-body-medium {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 500;
+  font-size: var(--body-font-size);
+  line-height: 150%;
+  letter-spacing: 0.01em;
+}
+
+/* Button Text — button */
+@utility text-button {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 700;
+  font-size: var(--button-font-size);
+  line-height: 100%;
+  letter-spacing: -1px;
+}
+
+/* CTA Band Heading */
+@utility text-cta-band-heading {
+  font-family: var(--font-cabinet-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: var(--cta-band-heading-font-size);
+  line-height: 120%;
+  letter-spacing: -1px;
+}
+
+/* One Liner - Regular */
+@utility text-one-liner {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 400;
+  font-size: var(--one-liner-font-size);
+  line-height: 100%;
+  letter-spacing: 0;
+}
+
+/* One Liner - Medium */
+@utility text-one-liner-medium {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 500;
+  font-size: var(--one-liner-font-size);
+  line-height: 100%;
+  letter-spacing: 0;
+}
+
+/* Small - Regular */
+@utility text-small {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 400;
+  font-size: var(--small-font-size);
+  line-height: 130%;
+  letter-spacing: 0.01em;
+}
+
+/* Small - Medium */
+@utility text-small-medium {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 500;
+  font-size: var(--small-font-size);
+  line-height: 130%;
+  letter-spacing: 0.01em;
+}
+
+/* Extra Small - Medium — span */
+@utility text-extra-small {
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 500;
+  font-size: var(--extra-small-font-size);
+  line-height: 110%;
+  letter-spacing: 0.01em;
+}
+
+@utility cta-gradient {
+  background-image: radial-gradient(
+    ellipse 76% 126% at 50% 50%,
+    #cfbeea 0%,
+    #cfbeea 43%,
+    #a78ddb 71.41%,
+    #7f5ccc 100%
+  );
+}
+
+@utility primary-cta {
+  @apply cta-gradient rounded-[64px] overflow-hidden p-0.5 shadow-[0px_2px_3px_0px_rgba(0,0,0,0.2)];
+}
+
+@utility primary-cta-inner {
+  @apply cta-gradient rounded-[62px] px-10 py-4 inline-block shadow-[inset_-5px_5px_6px_0px_rgba(255,255,255,0.74)] text-button;
 }
