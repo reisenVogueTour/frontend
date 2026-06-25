@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function FeaturedExperiences() {
   return (
-    <div className="relative flex flex-col gap-10 items-center bg-[linear-gradient(to_bottom,#cfbeea,#f9fafb_80%)] bg-cover py-10 px-5 lg:py-20 lg:px-10">
+    <div className="relative section-wrapper items-center bg-[linear-gradient(to_bottom,#cfbeea,#f9fafb_80%)] bg-cover">
       <Image
         src="/featured_experiences_heading.svg"
         alt="Need a little inspiration?"

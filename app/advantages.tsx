@@ -19,7 +19,7 @@ const advantages: Readonly<
 
 export default function Advantages() {
   return (
-    <div className="relative flex flex-col gap-10 px-5 py-10 lg:px-10 lg:py-20 bg-[linear-gradient(to_top,#cfbeea,#f9fafb_80%)] overflow-hidden ">
+    <div className="relative section-wrapper bg-[linear-gradient(to_top,#cfbeea,#f9fafb_80%)] overflow-hidden ">
       <Image
         className="hidden xl:block absolute z-0 right-0 h-full w-1/2"
         src="/advantages_line.svg"

@@ -19,7 +19,7 @@ const steps: Readonly<Array<{ heading: string; description: string }>> = [
 
 export default function HowItWorks() {
   return (
-    <section className="relative bg-white-base px-5 py-10 lg:py-20 lg:px-10 flex flex-col gap-10 items-center">
+    <section className="section-wrapper relative bg-white-base items-center">
       <Image
         src="/steps_line.svg"
         alt=""
