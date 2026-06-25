@@ -12,7 +12,7 @@ export default function Hero() {
         className="z-2 pointer-events-none absolute w-full h-1/2 bottom-0 backdrop-blur-xl bg-primary mask-[linear-gradient(to_top,#cfbeea_20%,transparent)]"
       />
       <Image
-        src="/hero_airplane_wing.webp"
+        src="/airplane_wing.webp"
         width={1068}
         height={832}
         alt=""
