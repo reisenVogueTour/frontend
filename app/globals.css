@@ -181,5 +181,5 @@ body {
 }
 
 @utility section-wrapper {
-  @apply flex flex-col gap-10 py-10 px-5 lg:py-20 lg:px-10;
+  @apply flex flex-col items-center gap-10 w-full max-w-400 py-10 px-5 lg:py-20 lg:px-10;
 }
