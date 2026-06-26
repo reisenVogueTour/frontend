@@ -1,8 +1,8 @@
-import Hero from "./hero";
-import FeaturedExperiences from "./featuredExperiencs";
-import CallToAction from "./callToAction";
-import HowItWorks from "./howItWorks";
-import Advantages from "./advantages";
+import Hero from "../components/home/hero";
+import FeaturedExperiences from "../components/home/featuredExperiencs";
+import CallToAction from "../components/home/callToAction";
+import HowItWorks from "../components/home/howItWorks";
+import Advantages from "../components/home/advantages";
 
 export default function Home() {
   return (
