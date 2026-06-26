@@ -3,7 +3,8 @@
 import { FormEvent, useState } from "react";
 import { PhoneInput, type CountryIso2 } from "react-international-phone";
 import "react-international-phone/style.css";
-import { loginUser, registerUser, type AuthUser, type UserRole } from "../lib/api";
+import { authApi } from "@/lib/api-client";
+import type { PublicUser, UserRole } from "@/lib/types/reisen";
 
 export type AuthMode = "login" | "register";
 
@@ -39,7 +40,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const [role, setRole] = useState<Exclude<UserRole, "admin">>("customer");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<PublicUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function validateForm() {
@@ -88,7 +89,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
     try {
       if (mode === "register") {
-        const registeredUser = await registerUser({
+        const auth = await authApi.register({
           email: email.trim().toLowerCase(),
           password,
           firstName: firstName.trim(),
@@ -96,18 +97,19 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
           phone,
           role,
         });
-        setUser(registeredUser);
-        setMessage("Account created. Log in with this email when you're ready.");
-        onModeChange("login");
+        localStorage.setItem("tc_token", auth.token);
+        localStorage.setItem("tc_user", JSON.stringify(auth.user));
+        setUser(auth.user);
+        setMessage("Account created. You're logged in.");
         return;
       }
 
-      const auth = await loginUser({
+      const auth = await authApi.login({
         email: email.trim().toLowerCase(),
         password,
       });
-      localStorage.setItem("reisen_token", auth.token);
-      localStorage.setItem("reisen_user", JSON.stringify(auth.user));
+      localStorage.setItem("tc_token", auth.token);
+      localStorage.setItem("tc_user", JSON.stringify(auth.user));
       setUser(auth.user);
       setMessage("You're logged in.");
     } catch (error) {
@@ -118,7 +120,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   }
 
   const userDisplayName =
-    user?.name ||
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     "Your account";
   const inputClassName =

@@ -237,19 +237,23 @@ function BrowseTab({
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError("");
-    api.experiences
-      .list(category === "all" ? { limit: 24 } : { category, limit: 24 })
-      .then((res) => {
-        if (!cancelled) setExperiences(res.items);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiRequestError ? err.message : "Could not load experiences.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+
+    void Promise.resolve().then(() => {
+      setLoading(true);
+      setError("");
+      api.experiences
+        .list(category === "all" ? { limit: 24 } : { category, limit: 24 })
+        .then((res) => {
+          if (!cancelled) setExperiences(res.items);
+        })
+        .catch((err) => {
+          if (!cancelled) setError(err instanceof ApiRequestError ? err.message : "Could not load experiences.");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    });
+
     return () => {
       cancelled = true;
     };
