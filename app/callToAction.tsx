@@ -7,7 +7,7 @@ export default function CallToAction() {
           Tell us where you&apos;re headed, we&apos;ll make it feel like home.
         </h2>
         <Link
-          href="/#hero"
+          href="/auth"
           className="primary-cta cursor-pointer block w-fit z-10"
         >
           <span className="primary-cta-inner">Find your next adventure</span>

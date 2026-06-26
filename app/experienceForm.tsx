@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 type Destination = { code: string; city: string };
@@ -65,13 +66,7 @@ export default function ExperienceForm() {
   const [destination, setDestination] = useState("TYO");
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        // TODO: find or generate experiences matching the selected route.
-      }}
-      className="flex flex-col items-center gap-10 relative z-3"
-    >
+    <div className="flex flex-col items-center gap-10 relative z-3">
       <div className="relative min-w-50 max-w-75 lg:max-w-full aspect-408/192 ">
         <Image
           src="/ticket_bg.svg"
@@ -110,9 +105,9 @@ export default function ExperienceForm() {
         </div>
       </div>
 
-      <button type="submit" className="primary-cta cursor-pointer">
+      <Link href="/auth" className="primary-cta cursor-pointer">
         <span className="primary-cta-inner">Find your next adventure</span>
-      </button>
-    </form>
+      </Link>
+    </div>
   );
 }
