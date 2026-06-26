@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Destination = { code: string; city: string };
 
@@ -61,6 +62,7 @@ function DestinationSelect({
 }
 
 export default function ExperienceForm() {
+  const router = useRouter();
   const [origin, setOrigin] = useState("LOS");
   const [destination, setDestination] = useState("TYO");
 
@@ -68,7 +70,9 @@ export default function ExperienceForm() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        // TODO: find or generate experiences matching the selected route.
+        const selected = DESTINATIONS.find((d) => d.code === destination);
+        const city = selected ? selected.city.split(",")[0] : "";
+        router.push(`/experiences?destination=${encodeURIComponent(city)}`);
       }}
       className="flex flex-col items-center gap-10 relative z-3"
     >
