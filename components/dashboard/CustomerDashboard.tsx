@@ -420,7 +420,7 @@ export default function CustomerDashboard() {
   }
 
   useEffect(() => {
-    load();
+    void Promise.resolve().then(load);
   }, []);
 
   const savedIds = new Set(data?.savedExperiences.map((e) => e.experienceId) ?? []);

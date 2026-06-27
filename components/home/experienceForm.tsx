@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
+import AuthAwareAdventureLink from "@/components/shared/AuthAwareAdventureLink";
 
 type Destination = { code: string; city: string };
 
@@ -105,9 +105,7 @@ export default function ExperienceForm() {
         </div>
       </div>
 
-      <Link href="/auth" className="primary-cta cursor-pointer">
-        <span className="primary-cta-inner">Find your next adventure</span>
-      </Link>
+      <AuthAwareAdventureLink />
     </div>
   );
 }

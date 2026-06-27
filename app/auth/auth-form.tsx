@@ -1,10 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PhoneInput, type CountryIso2 } from "react-international-phone";
 import "react-international-phone/style.css";
 import { authApi } from "@/lib/api-client";
-import type { PublicUser, UserRole } from "@/lib/types/reisen";
+import { getDashboardPath, storeAuthSession } from "@/lib/auth-client";
+import type { UserRole } from "@/lib/types/reisen";
 
 export type AuthMode = "login" | "register";
 
@@ -32,6 +34,7 @@ function validatePhone(phone: string) {
 }
 
 export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +43,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const [role, setRole] = useState<Exclude<UserRole, "admin">>("customer");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [user, setUser] = useState<PublicUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function validateForm() {
@@ -58,8 +60,8 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
       nextErrors.email = "Enter a valid email address.";
     }
 
-    if (password.length < 6) {
-      nextErrors.password = "Password must be at least 6 characters.";
+    if (password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters.";
     }
 
     if (mode === "register" && !validatePhone(phone)) {
@@ -97,10 +99,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
           phone,
           role,
         });
-        localStorage.setItem("tc_token", auth.token);
-        localStorage.setItem("tc_user", JSON.stringify(auth.user));
-        setUser(auth.user);
-        setMessage("Account created. You're logged in.");
+        storeAuthSession(auth);
+        setMessage("Account created. Redirecting...");
+        router.replace(getDashboardPath());
         return;
       }
 
@@ -108,10 +109,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         email: email.trim().toLowerCase(),
         password,
       });
-      localStorage.setItem("tc_token", auth.token);
-      localStorage.setItem("tc_user", JSON.stringify(auth.user));
-      setUser(auth.user);
-      setMessage("You're logged in.");
+      storeAuthSession(auth);
+      setMessage("You're logged in. Redirecting...");
+      router.replace(getDashboardPath());
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Authentication failed");
     } finally {
@@ -119,9 +119,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     }
   }
 
-  const userDisplayName =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    "Your account";
   const inputClassName =
     "h-12 rounded-2xl border border-primary/50 bg-white-base px-4 text-body-regular outline-none transition focus:border-secondary";
   const invalidInputClassName =
@@ -232,7 +229,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
               setErrors((current) => ({ ...current, password: undefined }));
             }}
             required
-            minLength={6}
+            minLength={8}
             placeholder="Enter your password"
             aria-invalid={Boolean(errors.password)}
             className={errors.password ? invalidInputClassName : inputClassName}
@@ -337,14 +334,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         </p>
       ) : null}
 
-      {user ? (
-        <div className="mt-4 rounded-2xl border border-primary/40 bg-white-base p-4">
-          <p className="text-small-medium text-dark-base">{userDisplayName}</p>
-          <p className="mt-1 text-small text-body-dark">
-            {user.email} · {user.role}
-          </p>
-        </div>
-      ) : null}
     </section>
   );
 }
