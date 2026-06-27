@@ -95,7 +95,7 @@ function PendingState() {
       <Hourglass size={28} className="text-warning mx-auto mb-3" />
       <h2 className="text-section-inner-title text-dark-base mb-2">Application under review</h2>
       <p className="text-body-regular text-body-dark">
-        Your provider application is being reviewed by our team. You'll be able to create and manage experiences
+        Your provider application is being reviewed by our team. You&apos;ll be able to create and manage experiences
         once it&apos;s approved — usually within a few hours.
       </p>
     </div>
