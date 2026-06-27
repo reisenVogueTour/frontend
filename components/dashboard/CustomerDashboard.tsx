@@ -19,6 +19,7 @@ import {
   Sparkles,
   Trees,
   Clock,
+  X,
 } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api-client";
 import type {
@@ -53,11 +54,11 @@ const CATEGORY_FILTERS: { value: ExperienceCategory | "all"; label: string; icon
 ];
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-NG", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
 function getGreeting(): string {
@@ -69,7 +70,6 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-// Shared keyframes for entrance + interaction animations.
 function AnimationStyles() {
   return (
     <style>{`
@@ -90,18 +90,10 @@ function AnimationStyles() {
         0%, 100% { transform: translate(0, 0) scale(1); }
         50% { transform: translate(20px, -16px) scale(1.08); }
       }
-      .fade-in-up {
-        animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-      .heart-pulse {
-        animation: heartPulse 0.35s ease-out;
-      }
-      .float-slow {
-        animation: floatSlow 5s ease-in-out infinite;
-      }
-      .blob-drift {
-        animation: blobDrift 12s ease-in-out infinite;
-      }
+      .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+      .heart-pulse { animation: heartPulse 0.35s ease-out; }
+      .float-slow { animation: floatSlow 5s ease-in-out infinite; }
+      .blob-drift { animation: blobDrift 12s ease-in-out infinite; }
     `}</style>
   );
 }
@@ -152,23 +144,225 @@ function CategoryPill({
   );
 }
 
+// ---------- Experience detail modal ----------
+
+function ExperienceDetailModal({
+  experience,
+  saved,
+  onClose,
+  onToggleSave,
+  onOpenBooking,
+}: {
+  experience: Experience;
+  saved: boolean;
+  onClose: () => void;
+  onToggleSave: (id: string) => void;
+  onOpenBooking: (experience: Experience) => void;
+}) {
+  const image = experience.images?.[0];
+  return (
+    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div
+        className="fade-in-up bg-white-base rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative aspect-[4/3]">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={image} alt={experience.title} className="w-full h-full object-cover rounded-t-3xl" />
+          ) : (
+            <div className="w-full h-full cta-gradient flex items-center justify-center rounded-t-3xl">
+              <Compass size={32} className="text-white-base/70" />
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center"
+          >
+            <X size={16} className="text-dark-base" />
+          </button>
+          <button
+            onClick={() => onToggleSave(experience.experienceId)}
+            aria-label={saved ? "Remove from saved" : "Save experience"}
+            className="absolute top-3 left-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center"
+          >
+            <Heart size={16} className={saved ? "fill-secondary text-secondary" : "text-body-dark"} />
+          </button>
+        </div>
+
+        <div className="p-6 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-extra-small text-body-dark capitalize">
+            <span className="rounded-full bg-primary-50 text-secondary px-2.5 py-1">{experience.category.replace("_", " ")}</span>
+            {experience.duration && (
+              <span className="flex items-center gap-1">
+                <Clock size={12} /> {experience.duration}
+              </span>
+            )}
+          </div>
+
+          <h2 className="text-section-inner-title text-dark-base">{experience.title}</h2>
+
+          <div className="flex items-center gap-1 text-small text-body-dark">
+            <MapPin size={14} /> {experience.destination}
+          </div>
+
+          <p className="text-body-regular text-body-dark">{experience.description}</p>
+
+          <div className="flex items-center gap-1 text-small text-body-dark">
+            <Users size={14} /> Up to {experience.maxGroupSize} people
+          </div>
+
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-body-medium text-dark-base">
+              from <span className="text-secondary">{formatPrice(experience.price, experience.currency)}</span> /person
+            </div>
+            <button
+              onClick={() => onOpenBooking(experience)}
+              className="rounded-full cta-gradient px-6 py-2.5 text-button text-dark-base"
+            >
+              Request Booking
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Booking modal ----------
+
+function BookingModal({ experience, onClose, onBooked }: { experience: Experience; onClose: () => void; onBooked: () => void }) {
+  const [requestedDate, setRequestedDate] = useState("");
+  const [groupSize, setGroupSize] = useState(1);
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  async function handleSubmit() {
+    if (!requestedDate) {
+      setError("Please choose a date.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      await api.bookings.create({
+        experienceId: experience.experienceId,
+        requestedDate: new Date(requestedDate).toISOString(),
+        groupSize,
+        ...(notes.trim() ? { notes: notes.trim() } : {}),
+      });
+      setSuccess(true);
+      onBooked();
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : "Could not submit your booking request.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="fade-in-up bg-white-base rounded-3xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-section-inner-title text-dark-base">
+            {success ? "Booking requested" : "Request booking"}
+          </h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
+            <X size={16} className="text-body-dark" />
+          </button>
+        </div>
+
+        {success ? (
+          <div className="flex flex-col items-center text-center gap-3 py-6">
+            <CheckCircle2 size={36} className="text-success" />
+            <p className="text-body-regular text-body-dark">
+              Your request for <span className="text-dark-base text-body-medium">{experience.title}</span> has been
+              sent to the provider. You&apos;ll see it as &quot;pending&quot; in your bookings until they confirm.
+            </p>
+            <button onClick={onClose} className="primary-cta mt-2">
+              <span className="primary-cta-inner !py-2.5 !px-6 text-dark-base">Done</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <p className="text-small text-body-dark">{experience.title}</p>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-small-medium text-body-dark">Date</span>
+              <input
+                type="date"
+                value={requestedDate}
+                onChange={(e) => setRequestedDate(e.target.value)}
+                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-small-medium text-body-dark">Group size</span>
+              <input
+                type="number"
+                min={1}
+                max={experience.maxGroupSize}
+                value={groupSize}
+                onChange={(e) => setGroupSize(Number(e.target.value))}
+                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
+              />
+              <span className="text-extra-small text-body-dark">Max {experience.maxGroupSize} people</span>
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-small-medium text-body-dark">Notes (optional)</span>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary resize-none"
+                placeholder="Any special requests..."
+              />
+            </label>
+
+            <div className="flex items-center justify-between text-body-medium text-dark-base">
+              <span>Total</span>
+              <span className="text-secondary">{formatPrice(experience.price * groupSize, experience.currency)}</span>
+            </div>
+
+            {error && <p className="text-small text-error">{error}</p>}
+
+            <button onClick={handleSubmit} disabled={submitting} className="primary-cta">
+              <span className="primary-cta-inner !py-3 text-dark-base block">
+                {submitting ? "Sending..." : "Confirm request"}
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Browse cards ----------
+
 function ExperienceBrowseCard({
   experience,
   saved,
   onToggleSave,
-  onRequestBooking,
+  onOpenDetail,
   delayMs,
 }: {
   experience: Experience;
   saved: boolean;
   onToggleSave: (id: string) => void;
-  onRequestBooking: (experience: Experience) => void;
+  onOpenDetail: (experience: Experience) => void;
   delayMs: number;
 }) {
   const [pulsing, setPulsing] = useState(false);
   const image = experience.images?.[0];
 
-  function handleHeartClick() {
+  function handleHeartClick(e: React.MouseEvent) {
+    e.stopPropagation();
     setPulsing(true);
     onToggleSave(experience.experienceId);
     setTimeout(() => setPulsing(false), 350);
@@ -176,10 +370,11 @@ function ExperienceBrowseCard({
 
   return (
     <div
-      className="fade-in-up flex flex-col rounded-3xl border border-body-off bg-white-base overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0px_12px_28px_0px_rgba(127,92,204,0.18)]"
+      onClick={() => onOpenDetail(experience)}
+      className="fade-in-up flex flex-col rounded-3xl border border-body-off bg-white-base overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0px_12px_28px_0px_rgba(127,92,204,0.18)] cursor-pointer"
       style={{ animationDelay: `${delayMs}ms` }}
     >
-      <div className="relative aspect-4/3 overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt={experience.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -210,12 +405,6 @@ function ExperienceBrowseCard({
         <div className="text-small text-body-dark mt-1">
           from <span className="text-body-medium text-dark-base">{formatPrice(experience.price, experience.currency)}</span> /person
         </div>
-        <button
-          onClick={() => onRequestBooking(experience)}
-          className="mt-3 rounded-full cta-gradient py-2.5 text-button text-dark-base text-center transition-transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          Request Booking
-        </button>
       </div>
     </div>
   );
@@ -224,11 +413,11 @@ function ExperienceBrowseCard({
 function BrowseTab({
   savedIds,
   onToggleSave,
-  onRequestBooking,
+  onOpenDetail,
 }: {
   savedIds: Set<string>;
   onToggleSave: (id: string) => void;
-  onRequestBooking: (experience: Experience) => void;
+  onOpenDetail: (experience: Experience) => void;
 }) {
   const [category, setCategory] = useState<ExperienceCategory | "all">("all");
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -272,7 +461,7 @@ function BrowseTab({
       {loading && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 animate-pulse">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="aspect-4/3 rounded-3xl bg-body-light" />
+            <div key={i} className="aspect-[4/3] rounded-3xl bg-body-light" />
           ))}
         </div>
       )}
@@ -297,7 +486,7 @@ function BrowseTab({
               experience={e}
               saved={savedIds.has(e.experienceId)}
               onToggleSave={onToggleSave}
-              onRequestBooking={onRequestBooking}
+              onOpenDetail={onOpenDetail}
               delayMs={i * 60}
             />
           ))}
@@ -307,11 +496,21 @@ function BrowseTab({
   );
 }
 
-function SavedExperienceCard({ experience, onUnsave, delayMs }: { experience: Experience; onUnsave: (id: string) => void; delayMs: number }) {
+function SavedExperienceCard({
+  experience,
+  onUnsave,
+  onOpenDetail,
+  delayMs,
+}: {
+  experience: Experience;
+  onUnsave: (id: string) => void;
+  onOpenDetail: (experience: Experience) => void;
+  delayMs: number;
+}) {
   const image = experience.images?.[0];
   return (
-    <div className="fade-in-up flex flex-col group" style={{ animationDelay: `${delayMs}ms` }}>
-      <div className="relative rounded-3xl overflow-hidden aspect-4/3 bg-primary-50">
+    <div className="fade-in-up flex flex-col group cursor-pointer" style={{ animationDelay: `${delayMs}ms` }} onClick={() => onOpenDetail(experience)}>
+      <div className="relative rounded-3xl overflow-hidden aspect-[4/3] bg-primary-50">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt={experience.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -321,7 +520,10 @@ function SavedExperienceCard({ experience, onUnsave, delayMs }: { experience: Ex
           </div>
         )}
         <button
-          onClick={() => onUnsave(experience.experienceId)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onUnsave(experience.experienceId);
+          }}
           aria-label="Remove from saved"
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center shadow-sm transition-transform hover:scale-110"
         >
@@ -389,7 +591,7 @@ function DashboardError({ message, onRetry }: { message: string; onRetry: () => 
       <AlertTriangle size={28} className="text-error mx-auto mb-3" />
       <p className="text-body-regular text-body-dark mb-4">{message}</p>
       <button onClick={onRetry} className="primary-cta">
-        <span className="primary-cta-inner py-2.5! px-6! text-dark-base">Try again</span>
+        <span className="primary-cta-inner !py-2.5 !px-6 text-dark-base">Try again</span>
       </button>
     </div>
   );
@@ -401,6 +603,8 @@ export default function CustomerDashboard() {
   const [status, setStatus] = useState<"loading" | "error" | "ready">("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [tab, setTab] = useState<"browse" | "bookings" | "saved">("browse");
+  const [detailExperience, setDetailExperience] = useState<Experience | null>(null);
+  const [bookingExperience, setBookingExperience] = useState<Experience | null>(null);
 
   async function load() {
     setStatus("loading");
@@ -450,10 +654,6 @@ export default function CustomerDashboard() {
     }
   }
 
-  function handleRequestBooking(experience: Experience) {
-    console.log("Request booking for", experience.experienceId);
-  }
-
   return (
     <div className="relative section-wrapper items-stretch! gap-10! bg-white-base min-h-screen overflow-hidden">
       <AnimationStyles />
@@ -478,21 +678,21 @@ export default function CustomerDashboard() {
             <div className="relative w-full max-w-70 h-32 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://6a3ef2cd424f14ba7961456f.imgix.net/beach-507411.jpeg"
+                src="https://images.unsplash.com/photo-1518544866330-95a16abae5e8?w=400&q=80"
                 alt="Beach destination"
                 className="absolute left-0 top-2 w-28 h-24 rounded-2xl object-cover shadow-[0px_8px_20px_0px_rgba(127,92,204,0.25)] rotate-6 border-4 border-white-base"
               />
-               {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://images.unsplash.com/photo-1531968455001-5c5272a41129?w=400&q=80"
                 alt="Cultural landmark"
                 className="absolute left-20 top-0 w-28 h-24 rounded-2xl object-cover shadow-[0px_8px_20px_0px_rgba(127,92,204,0.25)] rotate-3 border-4 border-white-base"
               />
-               {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&q=80"
                 alt="Adventure trail"
-                className="absolute left-40 top-3 w-28 h-24 rounded-2xl object-cover shadow-[0px_8px_20px_0px_rgba(127,92,204,0.25)] rotate-4deg border-4 border-white-base hidden md:block"
+                className="absolute left-40 top-3 w-28 h-24 rounded-2xl object-cover shadow-[0px_8px_20px_0px_rgba(127,92,204,0.25)] rotate-[-2deg] border-4 border-white-base hidden md:block"
               />
               <div className="float-slow absolute -bottom-3 left-6 rounded-full bg-white-base px-3 py-1.5 shadow-[0px_6px_16px_0px_rgba(127,92,204,0.25)] flex items-center gap-1.5 text-extra-small text-dark-base">
                 <Sparkles size={12} className="text-secondary" />
@@ -523,14 +723,14 @@ export default function CustomerDashboard() {
           </div>
 
           {tab === "browse" && (
-            <BrowseTab savedIds={savedIds} onToggleSave={handleToggleSave} onRequestBooking={handleRequestBooking} />
+            <BrowseTab savedIds={savedIds} onToggleSave={handleToggleSave} onOpenDetail={setDetailExperience} />
           )}
 
           {tab === "bookings" && (
             <section className="flex flex-col gap-3">
               {data.recentBookings.length === 0 ? (
                 <div className="fade-in-up rounded-3xl border border-dashed border-body-off p-10 text-center text-body-dark text-body-regular">
-                  No bookings yet,  browse experiences to plan your first trip.
+                  No bookings yet — browse experiences to plan your first trip.
                 </div>
               ) : (
                 data.recentBookings.map((b, i) => <BookingRow key={b.bookingId} booking={b} delayMs={i * 60} />)
@@ -542,18 +742,45 @@ export default function CustomerDashboard() {
             <section>
               {data.savedExperiences.length === 0 ? (
                 <div className="fade-in-up rounded-3xl border border-dashed border-body-off p-10 text-center text-body-dark text-body-regular">
-                  Nothing saved yet, tap the heart on any experience to keep it here.
+                  Nothing saved yet — tap the heart on any experience to keep it here.
                 </div>
               ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                   {data.savedExperiences.map((e, i) => (
-                    <SavedExperienceCard key={e.experienceId} experience={e} onUnsave={handleUnsave} delayMs={i * 60} />
+                    <SavedExperienceCard
+                      key={e.experienceId}
+                      experience={e}
+                      onUnsave={handleUnsave}
+                      onOpenDetail={setDetailExperience}
+                      delayMs={i * 60}
+                    />
                   ))}
                 </div>
               )}
             </section>
           )}
         </div>
+      )}
+
+      {detailExperience && (
+        <ExperienceDetailModal
+          experience={detailExperience}
+          saved={savedIds.has(detailExperience.experienceId)}
+          onClose={() => setDetailExperience(null)}
+          onToggleSave={handleToggleSave}
+          onOpenBooking={(exp) => {
+            setDetailExperience(null);
+            setBookingExperience(exp);
+          }}
+        />
+      )}
+
+      {bookingExperience && (
+        <BookingModal
+          experience={bookingExperience}
+          onClose={() => setBookingExperience(null)}
+          onBooked={load}
+        />
       )}
     </div>
   );

@@ -176,7 +176,7 @@ export interface CreateExperienceRequest {
 }
  
 export type UpdateExperienceRequest = Partial<
-  Omit<CreateExperienceRequest, "eventDate" | "numberOfDays"> & {
+  Omit<CreateExperienceRequest,"numberOfDays"> & {
     numberOfDays: number;
     status: ExperienceStatus;
   }
