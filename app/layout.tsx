@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "../components/shared/header";
-import Footer from "../components/shared/footer";
-
+import Header from "./shared/header"; // Changed
+import Footer from "./shared/footer"; // Changed
 import { AppProvider } from "./shared/AppContext";
 
 const satoshi = localFont({

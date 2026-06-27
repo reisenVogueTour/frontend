@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchAPI } from "./shared/api";
-import { Experience } from "./shared/AppContext";
+import { fetchAPI } from "../../app/shared/api";
+import { Experience } from "../../app/shared/AppContext";
+
 
 const MOCK_FEATURED: Experience[] = [
   {
@@ -94,18 +95,17 @@ export default function FeaturedExperiences() {
             experiences.map((exp, index) => {
               const tilt = index % 2 === 0 ? "neg" : "pos";
               const imageUrl = exp.images && exp.images[0] ? exp.images[0] : "/experience_placeholder.jpg";
-              
+
               return (
                 <Link
                   key={exp.experienceId}
                   href={`/experiences/${exp.experienceId}`}
-                  className={`sticky top-10 flex flex-col justify-end p-5 lg:p-10 gap-4 w-full h-100 max-w-160 lg:w-187.5 lg:h-120 bg-cover bg-center rounded-[28px] overflow-hidden group shadow-md transition-all duration-300 ${
-                    tilt === "pos" ? "" : "-"
-                  }rotate-3`}
+                  className={`sticky top-10 flex flex-col justify-end p-5 lg:p-10 gap-4 w-full h-100 max-w-160 lg:w-187.5 lg:h-120 bg-cover bg-center rounded-[28px] overflow-hidden group shadow-md transition-all duration-300 ${tilt === "pos" ? "" : "-"
+                    }rotate-3`}
                   style={{ backgroundImage: `url('${imageUrl}')` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-base via-dark-base/30 to-transparent opacity-85 z-1 group-hover:scale-105 transition-transform duration-500" />
-                  
+
                   <div className="relative z-10">
                     <h3 className="text-section-inner-title text-body-light group-hover:text-primary transition-colors">
                       {exp.title}

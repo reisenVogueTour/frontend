@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { fetchAPI } from "../../components/shared/api";
+import { fetchAPI } from "./api"; // Changed this line
 
 export type UserRole = "customer" | "provider" | "admin";
 export type ExperienceCategory =

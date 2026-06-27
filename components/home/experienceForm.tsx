@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import AuthAwareAdventureLink from "@/components/shared/AuthAwareAdventureLink";
+import { useRouter } from "next/navigation";
 
 type Destination = { code: string; city: string };
 
