@@ -25,7 +25,7 @@ import type {
   UpdateExperienceRequest,
 } from "./types/reisen";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 export class ApiRequestError extends Error {
   status: number;
@@ -54,16 +54,27 @@ function buildQuery(params?: Record<string, string | number | boolean | undefine
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
-  });
+  let res: Response;
 
-  const json = (await res.json()) as (ApiSuccess<T> & { message?: string }) | ApiError;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init?.headers,
+      },
+    });
+  } catch {
+    throw new ApiRequestError(
+      `Could not reach the backend at ${API_BASE_URL}. Check that the API server is running.`,
+      0,
+    );
+  }
+
+  const json = (await res.json().catch(() => ({}))) as
+    | (ApiSuccess<T> & { message?: string })
+    | ApiError;
 
   if (!res.ok || json.success === false) {
     const message = "message" in json && json.message ? json.message : "Request failed";
@@ -74,13 +85,37 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (json as ApiSuccess<T>).data;
 }
 
+type RawAuthResponse = Omit<AuthResponse, "token"> & {
+  token?: string;
+  accessToken?: string;
+};
+
+function normalizeAuthResponse(data: RawAuthResponse): AuthResponse {
+  const token = data.token || data.accessToken;
+
+  if (!token) {
+    throw new ApiRequestError("Auth response did not include a token.", 500);
+  }
+
+  return {
+    user: data.user,
+    token,
+  };
+}
+
 // ---------- Auth ----------
 export const authApi = {
   register: (body: RegisterRequest) =>
-    apiFetch<AuthResponse>("/api/auth/register", { method: "POST", body: JSON.stringify(body) }),
+    apiFetch<AuthResponse & { accessToken?: string }>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }).then(normalizeAuthResponse),
 
   login: (body: LoginRequest) =>
-    apiFetch<AuthResponse>("/api/auth/login", { method: "POST", body: JSON.stringify(body) }),
+    apiFetch<AuthResponse & { accessToken?: string }>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }).then(normalizeAuthResponse),
 
   me: () => apiFetch<PublicUser>("/api/auth/me"),
 };
