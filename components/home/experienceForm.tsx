@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import AuthAwareAdventureLink from "@/components/shared/AuthAwareAdventureLink";
 
 type Destination = { code: string; city: string };
 
@@ -36,9 +36,8 @@ function DestinationSelect({
 
   return (
     <div
-      className={`relative flex flex-col gap-2 ${
-        align === "end" ? "items-end text-right" : "items-start text-left"
-      }`}
+      className={`relative flex flex-col gap-2 ${align === "end" ? "items-end text-right" : "items-start text-left"
+        }`}
     >
       <h2 className="text-section-inner-title bg-[linear-gradient(to_bottom,#2d2d2d_35.761%,#666666_69.754%)] bg-clip-text text-transparent font-bold">
         {selected.code}
@@ -67,15 +66,7 @@ export default function ExperienceForm() {
   const [destination, setDestination] = useState("TYO");
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const selected = DESTINATIONS.find((d) => d.code === destination);
-        const city = selected ? selected.city.split(",")[0] : "";
-        router.push(`/experiences?destination=${encodeURIComponent(city)}`);
-      }}
-      className="flex flex-col items-center gap-10 relative z-3"
-    >
+    <div className="flex flex-col items-center gap-10 relative z-3">
       <div className="relative min-w-50 max-w-75 lg:max-w-full aspect-408/192 ">
         <Image
           src="/ticket_bg.svg"
@@ -114,9 +105,7 @@ export default function ExperienceForm() {
         </div>
       </div>
 
-      <button type="submit" className="primary-cta cursor-pointer">
-        <span className="primary-cta-inner">Find your next adventure</span>
-      </button>
-    </form>
+      <AuthAwareAdventureLink />
+    </div>
   );
 }

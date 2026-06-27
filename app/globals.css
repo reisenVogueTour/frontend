@@ -26,6 +26,158 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+.reisen-phone-input {
+  --react-international-phone-height: 48px;
+  --react-international-phone-border-radius: 16px;
+  --react-international-phone-border-color: transparent;
+  --react-international-phone-background-color: var(--color-white-base);
+  --react-international-phone-text-color: var(--color-dark-base);
+  --react-international-phone-font-size: var(--body-font-size);
+  --react-international-phone-country-selector-background-color-hover: var(
+    --color-primary-50
+  );
+  --react-international-phone-dropdown-shadow: 0 18px 48px
+    rgba(45, 45, 45, 0.18);
+  --react-international-phone-dropdown-item-height: 44px;
+  --react-international-phone-dropdown-item-font-size: var(--small-font-size);
+  --react-international-phone-dropdown-top: 56px;
+  --react-international-phone-dropdown-left: 0;
+  --react-international-phone-selected-dropdown-item-background-color: var(
+    --color-primary-50
+  );
+  --react-international-phone-selected-dropdown-item-text-color: var(
+    --color-dark-base
+  );
+  width: 100%;
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-radius: 18px;
+  background: var(--color-white-base);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.reisen-phone-input .react-international-phone-input-container {
+  width: 100%;
+}
+
+.reisen-phone-country-button {
+  min-width: 96px;
+  border: 0;
+  border-right: 1px solid
+    color-mix(in srgb, var(--color-primary) 42%, transparent);
+  border-radius: 17px 0 0 17px;
+  padding-inline: 16px 12px;
+  transition:
+    border-right-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.reisen-phone-country-button:hover {
+  background: var(--color-primary-50);
+}
+
+.reisen-phone-country-button .react-international-phone-country-selector-button__button-content {
+  gap: 7px;
+}
+
+.reisen-phone-input-field {
+  width: 100%;
+  border: 0;
+  border-radius: 0 16px 16px 0;
+  padding-inline: 18px;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.reisen-phone-input-field::placeholder {
+  color: color-mix(in srgb, var(--color-body-dark) 72%, transparent);
+}
+
+.reisen-phone-input:focus-within {
+  border-color: var(--color-secondary);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-secondary) 16%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.reisen-phone-input:focus-within .reisen-phone-country-button {
+  border-right-color: color-mix(in srgb, var(--color-secondary) 42%, transparent);
+}
+
+.reisen-phone-input-invalid {
+  border-color: var(--color-error);
+}
+
+.reisen-phone-input-invalid:focus-within {
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-error) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.reisen-phone-input-invalid .reisen-phone-country-button {
+  border-right-color: color-mix(in srgb, var(--color-error) 35%, transparent);
+}
+
+.reisen-phone-country-dropdown {
+  width: min(390px, calc(100vw - 32px));
+  max-height: 320px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 52%, transparent);
+  border-radius: 22px;
+  padding: 10px;
+  background: var(--color-white-base);
+  overflow: auto;
+}
+
+.reisen-phone-country-option {
+  min-height: 44px;
+  border-radius: 14px;
+  padding-inline: 12px;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.reisen-phone-country-option:hover,
+.reisen-phone-country-option-focused,
+.reisen-phone-country-option-selected {
+  background: var(--color-primary-50);
+}
+
+.reisen-phone-country-option-selected {
+  color: var(--color-secondary);
+}
+
+.reisen-phone-country-name {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-weight: 500;
+}
+
+.reisen-phone-country-code {
+  margin-left: auto;
+  color: var(--color-body-dark);
+}
+
+.reisen-phone-country-divider {
+  margin: 6px 0;
+  background: color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+@media (max-width: 420px) {
+  .reisen-phone-country-button {
+    min-width: 82px;
+    padding-inline: 12px 8px;
+  }
+
+  .reisen-phone-input-field {
+    padding-inline: 12px;
+  }
+}
+
 /* Typography scale */
 
 :root {
