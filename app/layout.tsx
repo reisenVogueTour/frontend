@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from "../components/shared/header";
 import Footer from "../components/shared/footer";
 
+import { AppProvider } from "./shared/AppContext";
+
 const satoshi = localFont({
   variable: "--font-satoshi",
   display: "swap",
