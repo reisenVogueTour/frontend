@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import AuthAwareAdventureLink from "@/components/shared/AuthAwareAdventureLink";
+import { useRouter } from "next/navigation";
 
 type Destination = { code: string; city: string };
 
@@ -36,9 +37,8 @@ function DestinationSelect({
 
   return (
     <div
-      className={`relative flex flex-col gap-2 ${
-        align === "end" ? "items-end text-right" : "items-start text-left"
-      }`}
+      className={`relative flex flex-col gap-2 ${align === "end" ? "items-end text-right" : "items-start text-left"
+        }`}
     >
       <h2 className="text-section-inner-title bg-[linear-gradient(to_bottom,#2d2d2d_35.761%,#666666_69.754%)] bg-clip-text text-transparent font-bold">
         {selected.code}
@@ -62,6 +62,7 @@ function DestinationSelect({
 }
 
 export default function ExperienceForm() {
+  const router = useRouter();
   const [origin, setOrigin] = useState("LOS");
   const [destination, setDestination] = useState("TYO");
 
