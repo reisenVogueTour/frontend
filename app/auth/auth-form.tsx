@@ -120,17 +120,17 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   }
 
   const inputClassName =
-    "h-12 rounded-2xl border border-primary/50 bg-white-base px-4 text-body-regular outline-none transition focus:border-secondary";
+    "h-12 w-full min-w-0 rounded-2xl border border-primary/50 bg-white-base px-4 text-body-regular outline-none transition focus:border-secondary";
   const invalidInputClassName =
-    "h-12 rounded-2xl border border-error bg-white-base px-4 text-body-regular outline-none transition focus:border-error";
+    "h-12 w-full min-w-0 rounded-2xl border border-error bg-white-base px-4 text-body-regular outline-none transition focus:border-error";
 
   return (
-    <section className="w-full max-w-lg rounded-[32px] border border-primary/40 bg-white-base/80 p-5 shadow-[0px_20px_80px_rgba(45,45,45,0.12)] backdrop-blur lg:p-8">
+    <section className="w-full min-w-0 max-w-lg rounded-[24px] border border-primary/40 bg-white-base/85 p-4 shadow-[0px_20px_80px_rgba(45,45,45,0.12)] backdrop-blur sm:p-5 sm:rounded-[32px] lg:p-8">
       <div className="grid grid-cols-2 rounded-[999px] bg-primary-50 p-1 text-small-medium">
         <button
           type="button"
           onClick={() => onModeChange("register")}
-          className={`rounded-[999px] px-4 py-3 transition ${
+          className={`rounded-[999px] px-3 py-3 transition sm:px-4 ${
             mode === "register"
               ? "bg-white-base text-dark-base shadow-sm"
               : "text-body-dark hover:text-dark-base"
@@ -141,7 +141,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         <button
           type="button"
           onClick={() => onModeChange("login")}
-          className={`rounded-[999px] px-4 py-3 transition ${
+          className={`rounded-[999px] px-3 py-3 transition sm:px-4 ${
             mode === "login"
               ? "bg-white-base text-dark-base shadow-sm"
               : "text-body-dark hover:text-dark-base"
@@ -151,7 +151,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-5 flex min-w-0 flex-col gap-4 sm:mt-6">
         {mode === "register" ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2 text-small-medium text-dark-base">
@@ -286,11 +286,11 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             <legend className="text-small-medium text-dark-base py-2">
               What brings you here?
             </legend>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 min-[430px]:grid-cols-2">
               {roleOptions.map((option) => (
                 <label
                   key={option.value}
-                  className={`cursor-pointer rounded-2xl border p-4 text-small-medium transition ${
+                  className={`cursor-pointer rounded-2xl border p-3 text-center text-small-medium transition sm:p-4 ${
                     role === option.value
                       ? "border-secondary bg-primary text-dark-base"
                       : "border-primary/50 bg-white-base text-body-dark hover:border-secondary"
