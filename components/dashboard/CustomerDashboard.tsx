@@ -31,6 +31,8 @@ import type {
   ExperienceCategory,
   PublicUser,
 } from "@/lib/types/reisen";
+import ExperienceCard from "@/components/experiences/experienceCard";
+
 
 const STATUS_CONFIG: Record<
   BookingStatus,
@@ -260,10 +262,14 @@ function BrowseTab({
         ))}
       </div>
 
-      {loading && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 animate-pulse">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="aspect-[4/3] rounded-3xl bg-body-light" />
+      {!loading && !error && experiences.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+          {experiences.map((e) => (
+            <ExperienceCard
+              key={e.experienceId}
+              experience={e}
+              onSavedChange={() => {}}
+            />
           ))}
         </div>
       )}
@@ -298,50 +304,6 @@ function BrowseTab({
   );
 }
 
-function SavedExperienceCard({
-  experience,
-  onUnsave,
-  onOpenDetail,
-  delayMs,
-}: {
-  experience: Experience;
-  onUnsave: (id: string) => void;
-  onOpenDetail: (experience: Experience) => void;
-  delayMs: number;
-}) {
-  const image = experience.images?.[0];
-  return (
-    <div className="fade-in-up flex flex-col group cursor-pointer" style={{ animationDelay: `${delayMs}ms` }} onClick={() => onOpenDetail(experience)}>
-      <div className="relative rounded-3xl overflow-hidden aspect-[4/3] bg-primary-50">
-        {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt={experience.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-        ) : (
-          <div className="w-full h-full cta-gradient flex items-center justify-center">
-            <Compass size={32} className="text-white-base/70" />
-          </div>
-        )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onUnsave(experience.experienceId);
-          }}
-          aria-label="Remove from saved"
-          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center shadow-sm transition-transform hover:scale-110"
-        >
-          <Heart size={16} className="fill-secondary text-secondary" />
-        </button>
-      </div>
-      <div className="text-body-medium text-dark-base mt-3 line-clamp-1">{experience.title}</div>
-      <div className="flex items-center gap-1 text-extra-small text-body-dark mt-1">
-        <MapPin size={12} /> {experience.destination}
-      </div>
-      <div className="text-small text-body-dark mt-1">
-        from <span className="text-body-medium text-dark-base">{formatPrice(experience.price, experience.currency)}</span> /person
-      </div>
-    </div>
-  );
-}
 
 function BookingRow({ booking, delayMs }: { booking: Booking; delayMs: number }) {
   return (
@@ -549,14 +511,14 @@ export default function CustomerDashboard() {
                   Nothing saved yet — tap the heart on any experience to keep it here.
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
                   {data.savedExperiences.map((e, i) => (
-                    <SavedExperienceCard
+                    <ExperienceCard
                       key={e.experienceId}
                       experience={e}
-                      onUnsave={handleUnsave}
-                      onOpenDetail={openExperience}
-                      delayMs={i * 60}
+                      onSavedChange={(saved) => {
+                        if (!saved) handleUnsave(e.experienceId);
+                      }}
                     />
                   ))}
                 </div>
