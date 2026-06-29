@@ -15,7 +15,7 @@ const MOCK_EXPERIENCES: Experience[] = [
     description:
       "Paddle through Lagos's beautiful lagoons, navigating around fishing communities and catching a breathtaking view of the Lekki-Ikoyi Bridge.",
     destination: "Lagos",
-    slug: "lagos",
+    destinationSlug: "lagos",
     category: "adventure",
     eventDate: "2026-08-10T09:00:00.000Z",
     numberOfDays: 1,
@@ -34,7 +34,7 @@ const MOCK_EXPERIENCES: Experience[] = [
     description:
       "Dive deep into the historic record shops of Shimokitazawa and enjoy pour-over coffee at tucked-away kissatens with a local music collector.",
     destination: "Tokyo",
-    slug: "tokyo",
+    destinationSlug: "tokyo",
     category: "cultural",
     eventDate: "2026-09-15T10:00:00.000Z",
     numberOfDays: 1,
@@ -53,7 +53,7 @@ const MOCK_EXPERIENCES: Experience[] = [
     description:
       "Walk inside the private ateliers where modern art was born. Meet working printmakers and paint on canvas overlooking the city.",
     destination: "Paris",
-    slug: "paris",
+    destinationSlug: "paris",
     category: "romantic",
     eventDate: "2026-07-20T14:00:00.000Z",
     numberOfDays: 1,
@@ -72,7 +72,7 @@ const MOCK_EXPERIENCES: Experience[] = [
     description:
       "Explore the rebellious roots of Camden and Shoreditch, following punk lore and identifying hidden masterpieces by street legends.",
     destination: "London",
-    slug: "london",
+    destinationSlug: "london",
     category: "nightlife",
     eventDate: "2026-08-25T18:00:00.000Z",
     numberOfDays: 1,

@@ -1,18 +1,18 @@
-export type UserRole = "customer" | "provider" | "admin";
+export type UserRole = 'customer' | 'provider' | 'admin';
 
 export type ExperienceCategory =
-  | "adventure"
-  | "relaxation"
-  | "nightlife"
-  | "cultural"
-  | "wildlife"
-  | "water_sports"
-  | "romantic"
-  | "family_friendly";
+  | 'adventure'
+  | 'relaxation'
+  | 'nightlife'
+  | 'cultural'
+  | 'wildlife'
+  | 'water_sports'
+  | 'romantic'
+  | 'family_friendly';
 
-export type ExperienceStatus = "draft" | "published" | "archived";
-export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
-export type ProviderApplicationStatus = "pending" | "approved" | "rejected";
+export type ExperienceStatus = 'draft' | 'published' | 'archived';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+export type ProviderApplicationStatus = 'pending' | 'approved' | 'rejected';
 
 export interface PublicUser {
   userId: string;
@@ -30,7 +30,7 @@ export interface Experience {
   title: string;
   description: string;
   destination: string;
-  slug: string;
+  destinationSlug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
@@ -152,6 +152,15 @@ export interface RegisterRequest {
   lastName: string;
   phone?: string;
   role?: UserRole;
+  // Provider-specific fields (optional, only when role = "provider")
+  businessName?: string;
+  description?: string;
+  location?: string;
+  businessAddress?: string;
+  companyEmail?: string;
+  companyPhone?: string;
+  cacNumber?: string;
+  cacDocumentUrl?: string;
 }
 
 export interface LoginRequest {
@@ -188,11 +197,11 @@ export interface CreateExperienceRequest {
   maxGroupSize: number;
   images?: string[];
   featured?: boolean;
-  status?: "draft" | "published";
+  status?: 'draft' | 'published';
 }
 
 export type UpdateExperienceRequest = Partial<
-  Omit<CreateExperienceRequest, "numberOfDays"> & {
+  Omit<CreateExperienceRequest, 'numberOfDays'> & {
     numberOfDays: number;
     status: ExperienceStatus;
   }
@@ -200,7 +209,7 @@ export type UpdateExperienceRequest = Partial<
 
 export interface CreateDestinationRequest {
   name: string;
-  state: string;
+  country: string;
   description: string;
   imageUrl: string;
   featured?: boolean;
@@ -215,7 +224,7 @@ export interface CreateBookingRequest {
 }
 
 export interface RecommendExperiencesRequest {
-  slug: string;
+  destinationSlug: string;
   prompt: string;
 }
 
@@ -246,6 +255,18 @@ export interface ApiError {
 }
 
 export interface ReviewProviderApplicationRequest {
-  status: "approved" | "rejected";
+  status: 'approved' | 'rejected';
   rejectionReason?: string;
+}
+
+export interface GenerateItineraryRequest {
+  destinationSlug: string;
+  prompt: string;
+  experienceIds: string[];
+  durationValue: number;
+  durationUnit: "hours" | "days" | "weeks" | "months";
+}
+
+export interface SaveItineraryRequest extends GenerateItineraryRequest {
+  start?: boolean;
 }

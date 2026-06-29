@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { fetchAPI } from "./api"; // Changed this line
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchAPI } from './api'; // Changed this line
 
-export type UserRole = "customer" | "provider" | "admin";
+export type UserRole = 'customer' | 'provider' | 'admin';
 export type ExperienceCategory =
-  | "adventure"
-  | "relaxation"
-  | "nightlife"
-  | "cultural"
-  | "wildlife"
-  | "water_sports"
-  | "romantic"
-  | "family_friendly";
+  | 'adventure'
+  | 'relaxation'
+  | 'nightlife'
+  | 'cultural'
+  | 'wildlife'
+  | 'water_sports'
+  | 'romantic'
+  | 'family_friendly';
 
 export interface User {
   userId: string;
@@ -30,7 +30,7 @@ export interface Experience {
   title: string;
   description: string;
   destination: string;
-  slug: string;
+  destinationSlug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
@@ -72,10 +72,7 @@ interface AppContextType {
     notes: string,
   ) => void;
   removeFromCart: (experienceId: string) => void;
-  updateCartItem: (
-    experienceId: string,
-    updates: Partial<Omit<CartItem, "experience">>,
-  ) => void;
+  updateCartItem: (experienceId: string, updates: Partial<Omit<CartItem, 'experience'>>) => void;
   clearCart: () => void;
   toggleSaveExperience: (experienceId: string) => Promise<void>;
   isSaved: (experienceId: string) => boolean;
@@ -93,9 +90,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Load state from localStorage on client render
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    const storedCart = localStorage.getItem("cart");
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    const storedCart = localStorage.getItem('cart');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -109,7 +106,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Sync saved experiences list if token is present
   useEffect(() => {
-    if (token && user && user.role !== "provider") {
+    if (token && user && user.role !== 'provider') {
       syncSavedWithBackend().catch(console.error);
     } else {
       setSavedIds([]);
@@ -118,27 +115,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const syncSavedWithBackend = async () => {
     try {
-      const savedList = await fetchAPI<Experience[]>("/api/saved");
+      const savedList = await fetchAPI<Experience[]>('/api/saved');
       setSavedIds(savedList.map((exp) => exp.experienceId));
     } catch (error) {
-      console.error("Failed to sync saved experiences", error);
+      console.error('Failed to sync saved experiences', error);
     }
   };
 
   const login = async (email: string, password: string) => {
-    const data = await fetchAPI<{ user: User; token: string }>(
-      "/api/auth/login",
-      {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      },
-    );
+    const data = await fetchAPI<{ user: User; token: string }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
 
     setUser(data.user);
     setToken(data.token);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
   };
+
+  // In AppContext.tsx, update the register function signature and implementation:
 
   const register = async (
     firstName: string,
@@ -146,27 +142,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     role: UserRole,
+    providerData?: {
+      businessName: string;
+      description: string;
+      location: string;
+      businessAddress: string;
+      companyEmail: string;
+      companyPhone: string;
+      cacNumber: string;
+      cacDocumentUrl?: string;
+    },
   ) => {
-    const data = await fetchAPI<{ user: User; token: string }>(
-      "/api/auth/register",
-      {
-        method: "POST",
-        body: JSON.stringify({ firstName, lastName, email, password, role }),
-      },
-    );
+    const payload: any = { firstName, lastName, email, password, role };
+
+    if (role === 'provider' && providerData) {
+      payload.businessName = providerData.businessName;
+      payload.description = providerData.description;
+      payload.location = providerData.location;
+      payload.businessAddress = providerData.businessAddress;
+      payload.companyEmail = providerData.companyEmail;
+      payload.companyPhone = providerData.companyPhone;
+      payload.cacNumber = providerData.cacNumber;
+      if (providerData.cacDocumentUrl) {
+        payload.cacDocumentUrl = providerData.cacDocumentUrl;
+      }
+    }
+
+    const data = await fetchAPI<{ user: User; token: string }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
 
     setUser(data.user);
     setToken(data.token);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     setSavedIds([]);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   // Cart operations
@@ -191,31 +209,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           notes,
         };
       } else {
-        newCart = [
-          ...prevCart,
-          { experience, requestedDate, groupSize, notes },
-        ];
+        newCart = [...prevCart, { experience, requestedDate, groupSize, notes }];
       }
 
-      localStorage.setItem("cart", JSON.stringify(newCart));
+      localStorage.setItem('cart', JSON.stringify(newCart));
       return newCart;
     });
   };
 
   const removeFromCart = (experienceId: string) => {
     setCart((prevCart) => {
-      const newCart = prevCart.filter(
-        (item) => item.experience.experienceId !== experienceId,
-      );
-      localStorage.setItem("cart", JSON.stringify(newCart));
+      const newCart = prevCart.filter((item) => item.experience.experienceId !== experienceId);
+      localStorage.setItem('cart', JSON.stringify(newCart));
       return newCart;
     });
   };
 
-  const updateCartItem = (
-    experienceId: string,
-    updates: Partial<Omit<CartItem, "experience">>,
-  ) => {
+  const updateCartItem = (experienceId: string, updates: Partial<Omit<CartItem, 'experience'>>) => {
     setCart((prevCart) => {
       const newCart = prevCart.map((item) => {
         if (item.experience.experienceId === experienceId) {
@@ -223,20 +233,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         return item;
       });
-      localStorage.setItem("cart", JSON.stringify(newCart));
+      localStorage.setItem('cart', JSON.stringify(newCart));
       return newCart;
     });
   };
 
   const clearCart = () => {
     setCart([]);
-    localStorage.removeItem("cart");
+    localStorage.removeItem('cart');
   };
 
   // Saved (wishlist) operations
   const toggleSaveExperience = async (experienceId: string) => {
     if (!token) {
-      throw new Error("You must be logged in to save experiences.");
+      throw new Error('You must be logged in to save experiences.');
     }
 
     const isAlreadySaved = savedIds.includes(experienceId);
@@ -244,13 +254,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isAlreadySaved) {
       // Remove
       await fetchAPI(`/api/saved/${experienceId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
       setSavedIds((prev) => prev.filter((id) => id !== experienceId));
     } else {
       // Add
       await fetchAPI(`/api/saved/${experienceId}`, {
-        method: "POST",
+        method: 'POST',
       });
       setSavedIds((prev) => [...prev, experienceId]);
     }
@@ -288,7 +298,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 export function useApp() {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider");
+    throw new Error('useApp must be used within an AppProvider');
   }
   return context;
 }
