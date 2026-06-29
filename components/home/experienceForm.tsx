@@ -1,109 +1,65 @@
 "use client";
 
-import Image from "next/image";
-import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import DestinationExperienceModal from "@/components/home/destinationExperienceModal";
 import { api } from "@/lib/api-client";
+import DestinationExperienceModal from "@/components/home/destinationExperienceModal";
+import SelectPropmt from "./experienceForm/selectPrompt";
+import SkeletonLoader from "./experienceForm/skeletonLoader";
+import Ticket from "./experienceForm/Ticket";
 import type { Destination } from "@/lib/types/reisen";
-
-function DestinationSelect({
-  destinations,
-  value,
-  onChange,
-}: {
-  destinations: Destination[];
-  value: string;
-  onChange: (slug: string) => void;
-}) {
-  const selected = destinations.find((d) => d.slug === value);
-
-  return (
-    <div className="relative flex flex-col gap-2 items-end">
-      <div className="flex items-center gap-1">
-        <h2 className="max-w-32 truncate text-section-inner-title bg-[linear-gradient(to_bottom,#2d2d2d_35.761%,#666666_69.754%)] bg-clip-text text-transparent font-bold uppercase">
-          {selected?.name ?? "Select"}
-        </h2>
-        <ChevronDown size={20} className="text-body-dark" aria-hidden />
-      </div>
-
-      <select
-        name="destination"
-        aria-label="Destination"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="absolute inset-0 cursor-pointer appearance-none opacity-0"
-      >
-        {destinations.map((destination, index) => {
-          console.log(destinations);
-          return (
-            <option
-              key={`{destination.slug}-${index}`}
-              value={destination.slug}
-            >
-              {destination.name}, {destination.country}
-            </option>
-          );
-        })}
-      </select>
-    </div>
-  );
-}
 
 export default function ExperienceForm() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [destination, setDestination] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [selectPrompt, setSelectPrompt] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api.destinations.list().then((data) => setDestinations(data.items));
+    async function loadDestinations() {
+      try {
+        const data = await api.destinations.list();
+        setDestinations(data.items);
+      } catch (err) {
+        setFetchError(
+          err instanceof Error ? err.message : "Failed to load destinations.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadDestinations();
   }, []);
 
   const selected = destinations.find((d) => d.slug === destination);
-  console.log(selected?.slug);
 
   return (
     <div className="flex flex-col items-center gap-10 relative z-3">
-      <div className="relative min-w-50 max-w-75 lg:max-w-full aspect-408/192 ">
-        <Image
-          src="/ticket_bg.svg"
-          alt=""
-          fill
-          sizes="408px"
-          className="object-contain"
-          priority
-        />
-
-        <div className="relative z-10 flex h-full flex-col justify-center gap-6 px-10 py-8">
-          <div className="flex justify-between">
-            <h2 className="text-section-inner-title bg-[linear-gradient(to_bottom,#2d2d2d_35.761%,#666666_69.754%)] bg-clip-text text-transparent font-bold uppercase">
-              Start
-            </h2>
-            <DestinationSelect
-              destinations={destinations}
-              value={destination}
-              onChange={setDestination}
-            />
-          </div>
-
-          <Image
-            src="/flight_path_home.svg"
-            alt=""
-            width={339}
-            height={11}
-            className="w-full h-auto"
-          />
+      {isLoading ? (
+        <SkeletonLoader />
+      ) : fetchError !== null ? (
+        <div className="flex flex-col gap-2 text-center">
+          <h2 className="text-section-inner-title text-error">
+            Could not load destinations
+          </h2>
+          <p className="text-body-medium text-body-dark">{fetchError}</p>
         </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setModalOpen(true)}
-        disabled={!selected}
-        className="primary-cta cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <span className="primary-cta-inner">Find your next adventure</span>
-      </button>
+      ) : destinations.length ? (
+        <Ticket
+          destination={destination}
+          destinations={destinations}
+          selected={selected}
+          setDestination={setDestination}
+          setDestinations={setDestinations}
+          setModalOpen={setModalOpen}
+          setSelectPrompt={setSelectPrompt}
+        />
+      ) : (
+        <p className="text-body-medium text-body-dark">
+          No destinations yet, check back later.
+        </p>
+      )}
 
       {modalOpen && selected && (
         <DestinationExperienceModal
@@ -112,6 +68,8 @@ export default function ExperienceForm() {
           onClose={() => setModalOpen(false)}
         />
       )}
+
+      {selectPrompt && <SelectPropmt setSelectPrompt={setSelectPrompt} />}
     </div>
   );
 }
