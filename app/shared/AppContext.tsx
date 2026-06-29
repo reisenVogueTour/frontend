@@ -30,7 +30,7 @@ export interface Experience {
   title: string;
   description: string;
   destination: string;
-  destinationSlug: string;
+  slug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
@@ -62,19 +62,19 @@ interface AppContextType {
     lastName: string,
     email: string,
     password: string,
-    role: UserRole
+    role: UserRole,
   ) => Promise<void>;
   logout: () => void;
   addToCart: (
     experience: Experience,
     requestedDate: string,
     groupSize: number,
-    notes: string
+    notes: string,
   ) => void;
   removeFromCart: (experienceId: string) => void;
   updateCartItem: (
     experienceId: string,
-    updates: Partial<Omit<CartItem, "experience">>
+    updates: Partial<Omit<CartItem, "experience">>,
   ) => void;
   clearCart: () => void;
   toggleSaveExperience: (experienceId: string) => Promise<void>;
@@ -126,10 +126,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const data = await fetchAPI<{ user: User; token: string }>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    const data = await fetchAPI<{ user: User; token: string }>(
+      "/api/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      },
+    );
 
     setUser(data.user);
     setToken(data.token);
@@ -142,12 +145,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lastName: string,
     email: string,
     password: string,
-    role: UserRole
+    role: UserRole,
   ) => {
-    const data = await fetchAPI<{ user: User; token: string }>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ firstName, lastName, email, password, role }),
-    });
+    const data = await fetchAPI<{ user: User; token: string }>(
+      "/api/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify({ firstName, lastName, email, password, role }),
+      },
+    );
 
     setUser(data.user);
     setToken(data.token);
@@ -168,11 +174,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     experience: Experience,
     requestedDate: string,
     groupSize: number,
-    notes: string
+    notes: string,
   ) => {
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex(
-        (item) => item.experience.experienceId === experience.experienceId
+        (item) => item.experience.experienceId === experience.experienceId,
       );
 
       let newCart: CartItem[];
@@ -185,7 +191,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           notes,
         };
       } else {
-        newCart = [...prevCart, { experience, requestedDate, groupSize, notes }];
+        newCart = [
+          ...prevCart,
+          { experience, requestedDate, groupSize, notes },
+        ];
       }
 
       localStorage.setItem("cart", JSON.stringify(newCart));
@@ -196,7 +205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeFromCart = (experienceId: string) => {
     setCart((prevCart) => {
       const newCart = prevCart.filter(
-        (item) => item.experience.experienceId !== experienceId
+        (item) => item.experience.experienceId !== experienceId,
       );
       localStorage.setItem("cart", JSON.stringify(newCart));
       return newCart;
@@ -205,7 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateCartItem = (
     experienceId: string,
-    updates: Partial<Omit<CartItem, "experience">>
+    updates: Partial<Omit<CartItem, "experience">>,
   ) => {
     setCart((prevCart) => {
       const newCart = prevCart.map((item) => {
