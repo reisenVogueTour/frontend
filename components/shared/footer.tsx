@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="flex items-end max-w-400 justify-end overflow-visible">
         <Image
           src="/logo_footer.svg"
-          alt="Reisen logo"
+          alt="Resisen logo"
           width={1512}
           height={403}
           sizes="100vw"
