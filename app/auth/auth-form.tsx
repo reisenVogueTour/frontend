@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { PhoneInput, type CountryIso2 } from "react-international-phone";
 import "react-international-phone/style.css";
 import { authApi } from "@/lib/api-client";
-import { getDashboardPath, storeAuthSession } from "@/lib/auth-client";
+import { storeAuthSession } from "@/lib/auth-client";
 import type { UserRole } from "@/lib/types/reisen";
 
 export type AuthMode = "login" | "register";
@@ -16,16 +16,30 @@ type AuthFormProps = {
 };
 
 type FieldErrors = Partial<
-  Record<"firstName" | "lastName" | "email" | "password" | "phone" | "role", string>
+  Record<
+    "firstName" | "lastName" | "email" | "password" | "phone" | "role",
+    string
+  >
 >;
 
-const roleOptions: Array<{ label: string; value: Exclude<UserRole, "admin"> }> = [
-  { label: "I want to travel", value: "customer" },
-  { label: "I host experiences", value: "provider" },
-];
+const roleOptions: Array<{ label: string; value: Exclude<UserRole, "admin"> }> =
+  [
+    { label: "I want to travel", value: "customer" },
+    { label: "I host experiences", value: "provider" },
+  ];
 
 const preferredCountries: CountryIso2[] = ["ng", "gh", "ke", "za", "gb", "us"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function getPostAuthPath(): string {
+  if (typeof window === "undefined") return "/";
+
+  const next = new URLSearchParams(window.location.search).get("next");
+
+  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+
+  return "/";
+}
 
 function validatePhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
@@ -101,7 +115,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         });
         storeAuthSession(auth);
         setMessage("Account created. Redirecting...");
-        router.replace(getDashboardPath());
+        router.replace(getPostAuthPath());
         return;
       }
 
@@ -111,9 +125,11 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
       });
       storeAuthSession(auth);
       setMessage("You're logged in. Redirecting...");
-      router.replace(getDashboardPath());
+      router.replace(getPostAuthPath());
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Authentication failed");
+      setMessage(
+        error instanceof Error ? error.message : "Authentication failed",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -151,7 +167,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-5 flex min-w-0 flex-col gap-4 sm:mt-6">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-5 flex min-w-0 flex-col gap-4 sm:mt-6"
+      >
         {mode === "register" ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2 text-small-medium text-dark-base">
@@ -160,7 +179,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 value={firstName}
                 onChange={(event) => {
                   setFirstName(event.target.value);
-                  setErrors((current) => ({ ...current, firstName: undefined }));
+                  setErrors((current) => ({
+                    ...current,
+                    firstName: undefined,
+                  }));
                 }}
                 required
                 minLength={2}
@@ -189,7 +211,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 minLength={2}
                 placeholder="Balogun"
                 aria-invalid={Boolean(errors.lastName)}
-                className={errors.lastName ? invalidInputClassName : inputClassName}
+                className={
+                  errors.lastName ? invalidInputClassName : inputClassName
+                }
               />
               {errors.lastName ? (
                 <span className="text-extra-small text-error">
@@ -235,7 +259,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             className={errors.password ? invalidInputClassName : inputClassName}
           />
           {errors.password ? (
-            <span className="text-extra-small text-error">{errors.password}</span>
+            <span className="text-extra-small text-error">
+              {errors.password}
+            </span>
           ) : null}
         </label>
 
@@ -267,8 +293,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 dropdownStyleProps: {
                   className: "reisen-phone-country-dropdown",
                   listItemClassName: "reisen-phone-country-option",
-                  listItemSelectedClassName: "reisen-phone-country-option-selected",
-                  listItemFocusedClassName: "reisen-phone-country-option-focused",
+                  listItemSelectedClassName:
+                    "reisen-phone-country-option-selected",
+                  listItemFocusedClassName:
+                    "reisen-phone-country-option-focused",
                   listItemCountryNameClassName: "reisen-phone-country-name",
                   listItemDialCodeClassName: "reisen-phone-country-code",
                   preferredListDividerClassName: "reisen-phone-country-divider",
@@ -276,7 +304,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
               }}
             />
             {errors.phone ? (
-              <span className="text-extra-small text-error">{errors.phone}</span>
+              <span className="text-extra-small text-error">
+                {errors.phone}
+              </span>
             ) : null}
           </div>
         ) : null}
@@ -317,7 +347,11 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
           </fieldset>
         ) : null}
 
-        <button type="submit" disabled={isSubmitting} className="primary-cta mt-2">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="primary-cta mt-2"
+        >
           <span className="primary-cta-inner w-full">
             {isSubmitting
               ? "Please wait..."
@@ -333,7 +367,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
           {message}
         </p>
       ) : null}
-
     </section>
   );
 }

@@ -26,7 +26,7 @@ export default function HowItWorks() {
           alt=""
           width={1044}
           height={194}
-          className="absolute -top-7 hidden lg:block"
+          className="absolute top-4 hidden lg:block"
         />
         <h2 className="text-section-title text-secondary">How it works</h2>
         <div className="flex flex-col lg:flex-row gap-10 lg:justify-between items-center w-full">

@@ -12,9 +12,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-lagos-kayak",
     providerId: "prov-1",
     title: "Kayaking in Lagos Lagoons",
-    description: "Paddle through Lagos's beautiful lagoons, navigating around fishing communities and catching a breathtaking view of the Lekki-Ikoyi Bridge.",
+    description:
+      "Paddle through Lagos's beautiful lagoons, navigating around fishing communities and catching a breathtaking view of the Lekki-Ikoyi Bridge.",
     destination: "Lagos",
-    destinationSlug: "lagos",
+    slug: "lagos",
     category: "adventure",
     eventDate: "2026-08-10T09:00:00.000Z",
     numberOfDays: 1,
@@ -30,9 +31,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-tokyo-vinyl",
     providerId: "prov-2",
     title: "Tokyo Vinyl & Slow Coffee Tour",
-    description: "Dive deep into the historic record shops of Shimokitazawa and enjoy pour-over coffee at tucked-away kissatens with a local music collector.",
+    description:
+      "Dive deep into the historic record shops of Shimokitazawa and enjoy pour-over coffee at tucked-away kissatens with a local music collector.",
     destination: "Tokyo",
-    destinationSlug: "tokyo",
+    slug: "tokyo",
     category: "cultural",
     eventDate: "2026-09-15T10:00:00.000Z",
     numberOfDays: 1,
@@ -48,9 +50,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-paris-art",
     providerId: "prov-3",
     title: "Montmartre Hidden Art Studios",
-    description: "Walk inside the private ateliers where modern art was born. Meet working printmakers and paint on canvas overlooking the city.",
+    description:
+      "Walk inside the private ateliers where modern art was born. Meet working printmakers and paint on canvas overlooking the city.",
     destination: "Paris",
-    destinationSlug: "paris",
+    slug: "paris",
     category: "romantic",
     eventDate: "2026-07-20T14:00:00.000Z",
     numberOfDays: 1,
@@ -66,9 +69,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-london-punk",
     providerId: "prov-4",
     title: "East London Street Art & Punk History",
-    description: "Explore the rebellious roots of Camden and Shoreditch, following punk lore and identifying hidden masterpieces by street legends.",
+    description:
+      "Explore the rebellious roots of Camden and Shoreditch, following punk lore and identifying hidden masterpieces by street legends.",
     destination: "London",
-    destinationSlug: "london",
+    slug: "london",
     category: "nightlife",
     eventDate: "2026-08-25T18:00:00.000Z",
     numberOfDays: 1,
@@ -104,9 +108,15 @@ function ExperiencesContent() {
   const [error, setError] = useState("");
 
   // Filters state from query parameters
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [selectedDest, setSelectedDest] = useState(searchParams.get("destination") || "");
-  const [selectedCat, setSelectedCat] = useState(searchParams.get("category") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || "",
+  );
+  const [selectedDest, setSelectedDest] = useState(
+    searchParams.get("destination") || "",
+  );
+  const [selectedCat, setSelectedCat] = useState(
+    searchParams.get("category") || "",
+  );
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,28 +158,31 @@ function ExperiencesContent() {
         if (maxP) query += `&maxPrice=${maxP}`;
 
         const result = await fetchAPI<{ items: Experience[] }>(query);
-        
+
         if (result.items && result.items.length > 0) {
           setExperiences(result.items);
         } else {
           // If 0 items returned from backend database, fallback to filtered mock experiences
           let filteredMock = [...MOCK_EXPERIENCES];
           if (dest) {
-            filteredMock = filteredMock.filter(exp => 
-              exp.destination.toLowerCase().includes(dest.toLowerCase())
+            filteredMock = filteredMock.filter((exp) =>
+              exp.destination.toLowerCase().includes(dest.toLowerCase()),
             );
           }
           if (cat) {
-            filteredMock = filteredMock.filter(exp => exp.category === cat);
+            filteredMock = filteredMock.filter((exp) => exp.category === cat);
           }
           if (search) {
-            filteredMock = filteredMock.filter(exp => 
-              exp.title.toLowerCase().includes(search.toLowerCase()) || 
-              exp.description.toLowerCase().includes(search.toLowerCase())
+            filteredMock = filteredMock.filter(
+              (exp) =>
+                exp.title.toLowerCase().includes(search.toLowerCase()) ||
+                exp.description.toLowerCase().includes(search.toLowerCase()),
             );
           }
           if (maxP) {
-            filteredMock = filteredMock.filter(exp => exp.price <= Number(maxP));
+            filteredMock = filteredMock.filter(
+              (exp) => exp.price <= Number(maxP),
+            );
           }
           setExperiences(filteredMock);
         }
@@ -183,21 +196,24 @@ function ExperiencesContent() {
 
         let filteredMock = [...MOCK_EXPERIENCES];
         if (dest) {
-          filteredMock = filteredMock.filter(exp => 
-            exp.destination.toLowerCase().includes(dest.toLowerCase())
+          filteredMock = filteredMock.filter((exp) =>
+            exp.destination.toLowerCase().includes(dest.toLowerCase()),
           );
         }
         if (cat) {
-          filteredMock = filteredMock.filter(exp => exp.category === cat);
+          filteredMock = filteredMock.filter((exp) => exp.category === cat);
         }
         if (search) {
-          filteredMock = filteredMock.filter(exp => 
-            exp.title.toLowerCase().includes(search.toLowerCase()) || 
-            exp.description.toLowerCase().includes(search.toLowerCase())
+          filteredMock = filteredMock.filter(
+            (exp) =>
+              exp.title.toLowerCase().includes(search.toLowerCase()) ||
+              exp.description.toLowerCase().includes(search.toLowerCase()),
           );
         }
         if (maxP) {
-          filteredMock = filteredMock.filter(exp => exp.price <= Number(maxP));
+          filteredMock = filteredMock.filter(
+            (exp) => exp.price <= Number(maxP),
+          );
         }
         setExperiences(filteredMock);
       } finally {
@@ -226,7 +242,9 @@ function ExperiencesContent() {
     <div className="w-full max-w-400 mx-auto px-5 lg:px-10 pb-20 pt-24 lg:pt-32">
       {/* Header section */}
       <div className="mb-10 text-center lg:text-left">
-        <h1 className="text-section-title text-dark-base mb-2">Explore Experiences</h1>
+        <h1 className="text-section-title text-dark-base mb-2">
+          Explore Experiences
+        </h1>
         <p className="text-body-medium text-body-dark">
           Find matched activities hosted by local specialists.
         </p>
@@ -236,12 +254,16 @@ function ExperiencesContent() {
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Filters sidebar */}
         <div className="w-full lg:w-64 flex-shrink-0 bg-white-base border border-body-off rounded-2xl p-6 h-fit shadow-sm">
-          <h2 className="text-one-liner-medium text-dark-base mb-4 font-bold border-b pb-2">Filters</h2>
-          
+          <h2 className="text-one-liner-medium text-dark-base mb-4 font-bold border-b pb-2">
+            Filters
+          </h2>
+
           <div className="flex flex-col gap-6">
             {/* Search Input */}
             <div className="flex flex-col gap-2">
-              <label className="text-extra-small text-body-dark uppercase">Search</label>
+              <label className="text-extra-small text-body-dark uppercase">
+                Search
+              </label>
               <input
                 type="text"
                 placeholder="What are you looking for?"
@@ -253,7 +275,9 @@ function ExperiencesContent() {
 
             {/* Destination Select */}
             <div className="flex flex-col gap-2">
-              <label className="text-extra-small text-body-dark uppercase">Destination</label>
+              <label className="text-extra-small text-body-dark uppercase">
+                Destination
+              </label>
               <select
                 value={selectedDest}
                 onChange={(e) => setSelectedDest(e.target.value)}
@@ -269,7 +293,9 @@ function ExperiencesContent() {
 
             {/* Category Select */}
             <div className="flex flex-col gap-2">
-              <label className="text-extra-small text-body-dark uppercase">Category</label>
+              <label className="text-extra-small text-body-dark uppercase">
+                Category
+              </label>
               <select
                 value={selectedCat}
                 onChange={(e) => setSelectedCat(e.target.value)}
@@ -286,7 +312,8 @@ function ExperiencesContent() {
             {/* Max Price Range */}
             <div className="flex flex-col gap-2">
               <label className="text-extra-small text-body-dark uppercase">
-                Max Price: {maxPrice ? `${Number(maxPrice).toLocaleString()} NGN` : "Any"}
+                Max Price:{" "}
+                {maxPrice ? `${Number(maxPrice).toLocaleString()} NGN` : "Any"}
               </label>
               <input
                 type="range"
@@ -326,7 +353,10 @@ function ExperiencesContent() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="animate-pulse flex flex-col gap-4 border border-body-off rounded-[28px] p-4 bg-white-base">
+                <div
+                  key={i}
+                  className="animate-pulse flex flex-col gap-4 border border-body-off rounded-[28px] p-4 bg-white-base"
+                >
                   <div className="h-60 bg-body-off rounded-2xl w-full" />
                   <div className="h-6 bg-body-off rounded w-3/4" />
                   <div className="h-4 bg-body-off rounded w-1/2" />
@@ -336,21 +366,27 @@ function ExperiencesContent() {
             </div>
           ) : experiences.length === 0 ? (
             <div className="text-center py-20 bg-white-base border border-body-off rounded-[28px] p-10 flex flex-col items-center justify-center gap-4">
-              <span className="text-section-inner-title text-body-dark">No experiences found</span>
+              <span className="text-section-inner-title text-body-dark">
+                No experiences found
+              </span>
               <p className="text-body-medium text-body-dark max-w-sm">
-                Try loosening your filter parameters or search terms to discover more local activities.
+                Try loosening your filter parameters or search terms to discover
+                more local activities.
               </p>
               <button
                 onClick={clearFilters}
                 className="primary-cta cursor-pointer mt-2"
               >
-                <span className="primary-cta-inner px-6 py-2.5">Clear All Filters</span>
+                <span className="primary-cta-inner px-6 py-2.5">
+                  Clear All Filters
+                </span>
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {experiences.map((exp, index) => {
-                const tiltClass = index % 2 === 0 ? "hover:rotate-1" : "hover:-rotate-1";
+                const tiltClass =
+                  index % 2 === 0 ? "hover:rotate-1" : "hover:-rotate-1";
                 const isSavedExp = isSaved(exp.experienceId);
 
                 return (
@@ -360,7 +396,12 @@ function ExperiencesContent() {
                     className={`group relative flex flex-col justify-end p-5 lg:p-8 border-2 border-primary rounded-[28px] bg-[url('/noise.svg')] bg-cover w-full h-100 bg-center overflow-hidden hover:shadow-lg transition-all duration-300 ${tiltClass}`}
                   >
                     {/* Background image overlay */}
-                    <div className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${exp.images && exp.images[0] ? exp.images[0] : "/experience_placeholder.jpg"}')` }} />
+                    <div
+                      className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                      style={{
+                        backgroundImage: `url('${exp.images && exp.images[0] ? exp.images[0] : "/experience_placeholder.jpg"}')`,
+                      }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-dark-base via-dark-base/40 to-transparent opacity-85 z-1" />
 
                     {/* Save Button */}
@@ -377,7 +418,11 @@ function ExperiencesContent() {
                         strokeWidth="2.5"
                         className="w-5 h-5"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                        />
                       </svg>
                     </button>
 
@@ -391,7 +436,7 @@ function ExperiencesContent() {
                           {exp.price.toLocaleString()} NGN
                         </span>
                       </div>
-                      
+
                       <h3 className="text-section-inner-title text-white-base leading-tight">
                         {exp.title}
                       </h3>
@@ -404,7 +449,8 @@ function ExperiencesContent() {
                           alt="Location icon"
                           className="brightness-200"
                         />
-                        {exp.destination} · {exp.duration || `${exp.numberOfDays} days`}
+                        {exp.destination} ·{" "}
+                        {exp.duration || `${exp.numberOfDays} days`}
                       </p>
 
                       <p className="text-small text-body-off opacity-90 line-clamp-2 mt-1">
@@ -424,11 +470,13 @@ function ExperiencesContent() {
 
 export default function ExperiencesPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary"></div>
+        </div>
+      }
+    >
       <ExperiencesContent />
     </Suspense>
   );

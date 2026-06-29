@@ -1,6 +1,11 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/ai-recommendations")) return null;
   return (
     <footer className="relative flex justify-center bg-primary h-90 lg:h-175">
       <Image

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   Heart,
@@ -19,9 +20,9 @@ import {
   Sparkles,
   Trees,
   Clock,
-  X,
 } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api-client";
+import { formatPrice } from "@/lib/format";
 import type {
   Booking,
   DashboardResponse,
@@ -50,15 +51,11 @@ const CATEGORY_FILTERS: { value: ExperienceCategory | "all"; label: string; icon
   { value: "wildlife", label: "Wildlife", icon: Trees },
   { value: "water_sports", label: "Water Sports", icon: Waves },
   { value: "romantic", label: "Romantic", icon: Heart },
-  { value: "family-friendly", label: "Family", icon: Utensils },
+  { value: "family_friendly", label: "Family", icon: Utensils },
 ];
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
 function getGreeting(): string {
@@ -141,205 +138,6 @@ function CategoryPill({
       <Icon size={15} />
       {label}
     </button>
-  );
-}
-
-// ---------- Experience detail modal ----------
-
-function ExperienceDetailModal({
-  experience,
-  saved,
-  onClose,
-  onToggleSave,
-  onOpenBooking,
-}: {
-  experience: Experience;
-  saved: boolean;
-  onClose: () => void;
-  onToggleSave: (id: string) => void;
-  onOpenBooking: (experience: Experience) => void;
-}) {
-  const image = experience.images?.[0];
-  return (
-    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className="fade-in-up bg-white-base rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="relative aspect-[4/3]">
-          {image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt={experience.title} className="w-full h-full object-cover rounded-t-3xl" />
-          ) : (
-            <div className="w-full h-full cta-gradient flex items-center justify-center rounded-t-3xl">
-              <Compass size={32} className="text-white-base/70" />
-            </div>
-          )}
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center"
-          >
-            <X size={16} className="text-dark-base" />
-          </button>
-          <button
-            onClick={() => onToggleSave(experience.experienceId)}
-            aria-label={saved ? "Remove from saved" : "Save experience"}
-            className="absolute top-3 left-3 w-9 h-9 rounded-full bg-white-base/90 flex items-center justify-center"
-          >
-            <Heart size={16} className={saved ? "fill-secondary text-secondary" : "text-body-dark"} />
-          </button>
-        </div>
-
-        <div className="p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-extra-small text-body-dark capitalize">
-            <span className="rounded-full bg-primary-50 text-secondary px-2.5 py-1">{experience.category.replace("_", " ")}</span>
-            {experience.duration && (
-              <span className="flex items-center gap-1">
-                <Clock size={12} /> {experience.duration}
-              </span>
-            )}
-          </div>
-
-          <h2 className="text-section-inner-title text-dark-base">{experience.title}</h2>
-
-          <div className="flex items-center gap-1 text-small text-body-dark">
-            <MapPin size={14} /> {experience.destination}
-          </div>
-
-          <p className="text-body-regular text-body-dark">{experience.description}</p>
-
-          <div className="flex items-center gap-1 text-small text-body-dark">
-            <Users size={14} /> Up to {experience.maxGroupSize} people
-          </div>
-
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-body-medium text-dark-base">
-              from <span className="text-secondary">{formatPrice(experience.price, experience.currency)}</span> /person
-            </div>
-            <button
-              onClick={() => onOpenBooking(experience)}
-              className="rounded-full cta-gradient px-6 py-2.5 text-button text-dark-base"
-            >
-              Request Booking
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Booking modal ----------
-
-function BookingModal({ experience, onClose, onBooked }: { experience: Experience; onClose: () => void; onBooked: () => void }) {
-  const [requestedDate, setRequestedDate] = useState("");
-  const [groupSize, setGroupSize] = useState(1);
-  const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  async function handleSubmit() {
-    if (!requestedDate) {
-      setError("Please choose a date.");
-      return;
-    }
-    setSubmitting(true);
-    setError("");
-    try {
-      await api.bookings.create({
-        experienceId: experience.experienceId,
-        requestedDate: new Date(requestedDate).toISOString(),
-        groupSize,
-        ...(notes.trim() ? { notes: notes.trim() } : {}),
-      });
-      setSuccess(true);
-      onBooked();
-    } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Could not submit your booking request.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="fade-in-up bg-white-base rounded-3xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-section-inner-title text-dark-base">
-            {success ? "Booking requested" : "Request booking"}
-          </h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
-            <X size={16} className="text-body-dark" />
-          </button>
-        </div>
-
-        {success ? (
-          <div className="flex flex-col items-center text-center gap-3 py-6">
-            <CheckCircle2 size={36} className="text-success" />
-            <p className="text-body-regular text-body-dark">
-              Your request for <span className="text-dark-base text-body-medium">{experience.title}</span> has been
-              sent to the provider. You&apos;ll see it as &quot;pending&quot; in your bookings until they confirm.
-            </p>
-            <button onClick={onClose} className="primary-cta mt-2">
-              <span className="primary-cta-inner !py-2.5 !px-6 text-dark-base">Done</span>
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <p className="text-small text-body-dark">{experience.title}</p>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-small-medium text-body-dark">Date</span>
-              <input
-                type="date"
-                value={requestedDate}
-                onChange={(e) => setRequestedDate(e.target.value)}
-                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-small-medium text-body-dark">Group size</span>
-              <input
-                type="number"
-                min={1}
-                max={experience.maxGroupSize}
-                value={groupSize}
-                onChange={(e) => setGroupSize(Number(e.target.value))}
-                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
-              />
-              <span className="text-extra-small text-body-dark">Max {experience.maxGroupSize} people</span>
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-small-medium text-body-dark">Notes (optional)</span>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary resize-none"
-                placeholder="Any special requests..."
-              />
-            </label>
-
-            <div className="flex items-center justify-between text-body-medium text-dark-base">
-              <span>Total</span>
-              <span className="text-secondary">{formatPrice(experience.price * groupSize, experience.currency)}</span>
-            </div>
-
-            {error && <p className="text-small text-error">{error}</p>}
-
-            <button onClick={handleSubmit} disabled={submitting} className="primary-cta">
-              <span className="primary-cta-inner !py-3 text-dark-base block">
-                {submitting ? "Sending..." : "Confirm request"}
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -607,8 +405,10 @@ export default function CustomerDashboard() {
   const [status, setStatus] = useState<"loading" | "error" | "ready">("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [tab, setTab] = useState<"browse" | "bookings" | "saved">("browse");
-  const [detailExperience, setDetailExperience] = useState<Experience | null>(null);
-  const [bookingExperience, setBookingExperience] = useState<Experience | null>(null);
+  const router = useRouter();
+
+  const openExperience = (exp: Experience) =>
+    router.push(`/experiences/${exp.experienceId}`);
 
   async function load() {
     setStatus("loading");
@@ -727,7 +527,7 @@ export default function CustomerDashboard() {
           </div>
 
           {tab === "browse" && (
-            <BrowseTab savedIds={savedIds} onToggleSave={handleToggleSave} onOpenDetail={setDetailExperience} />
+            <BrowseTab savedIds={savedIds} onToggleSave={handleToggleSave} onOpenDetail={openExperience} />
           )}
 
           {tab === "bookings" && (
@@ -755,7 +555,7 @@ export default function CustomerDashboard() {
                       key={e.experienceId}
                       experience={e}
                       onUnsave={handleUnsave}
-                      onOpenDetail={setDetailExperience}
+                      onOpenDetail={openExperience}
                       delayMs={i * 60}
                     />
                   ))}
@@ -766,26 +566,6 @@ export default function CustomerDashboard() {
         </div>
       )}
 
-      {detailExperience && (
-        <ExperienceDetailModal
-          experience={detailExperience}
-          saved={savedIds.has(detailExperience.experienceId)}
-          onClose={() => setDetailExperience(null)}
-          onToggleSave={handleToggleSave}
-          onOpenBooking={(exp) => {
-            setDetailExperience(null);
-            setBookingExperience(exp);
-          }}
-        />
-      )}
-
-      {bookingExperience && (
-        <BookingModal
-          experience={bookingExperience}
-          onClose={() => setBookingExperience(null)}
-          onBooked={load}
-        />
-      )}
     </div>
   );
 }

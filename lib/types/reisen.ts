@@ -1,6 +1,14 @@
 export type UserRole = "customer" | "provider" | "admin";
 
-export type ExperienceCategory = "adventure" | "relaxation" | "nightlife" | "cultural" | "wildlife" | "water_sports" |"romantic"| "family-friendly";
+export type ExperienceCategory =
+  | "adventure"
+  | "relaxation"
+  | "nightlife"
+  | "cultural"
+  | "wildlife"
+  | "water_sports"
+  | "romantic"
+  | "family_friendly";
 
 export type ExperienceStatus = "draft" | "published" | "archived";
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
@@ -15,14 +23,14 @@ export interface PublicUser {
   phone?: string;
   createdAt: string;
 }
- 
+
 export interface Experience {
   experienceId: string;
   providerId: string;
   title: string;
   description: string;
   destination: string;
-  destinationSlug: string;
+  slug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
@@ -36,7 +44,7 @@ export interface Experience {
   createdAt: string;
   updatedAt: string;
 }
- 
+
 export interface Booking {
   bookingId: string;
   userId: string;
@@ -53,7 +61,7 @@ export interface Booking {
   updatedAt: string;
   destination?: string;
 }
- 
+
 export interface Provider {
   providerId: string;
   userId: string;
@@ -72,7 +80,7 @@ export interface Provider {
   createdAt: string;
   updatedAt: string;
 }
- 
+
 export interface DashboardResponse {
   recentBookings: Booking[];
   savedExperiences: Experience[];
@@ -81,7 +89,7 @@ export interface DashboardResponse {
     totalSaved: number;
   };
 }
- 
+
 export interface AdminDashboardResponse {
   stats: {
     pendingApplications: number;
@@ -90,23 +98,24 @@ export interface AdminDashboardResponse {
   };
   recentPendingApplications: Provider[];
 }
- 
+
 export interface Destination {
-  destinationSlug: string;
+  slug: string;
   name: string;
-  state: string;
+  country: string;
   description: string;
   imageUrl: string;
   featured: boolean;
   createdAt: string;
   updatedAt: string;
+  experiencesCount: number;
 }
- 
+
 export interface Paginated<T> {
   items: T[];
   nextCursor?: string;
 }
- 
+
 export interface ProviderDashboardResponse {
   profile: Provider;
   applicationStatus: ProviderApplicationStatus;
@@ -120,7 +129,7 @@ export interface ProviderDashboardResponse {
     pendingBookings: number;
   };
 }
- 
+
 export interface PublicProvider {
   providerId: string;
   businessName: string;
@@ -128,7 +137,7 @@ export interface PublicProvider {
   location: string;
   createdAt: string;
 }
- 
+
 export interface RegisterRequest {
   email: string;
   password: string;
@@ -137,17 +146,17 @@ export interface RegisterRequest {
   phone?: string;
   role?: UserRole;
 }
- 
+
 export interface LoginRequest {
   email: string;
   password: string;
 }
- 
+
 export interface AuthResponse {
   user: PublicUser;
   token: string;
 }
- 
+
 export interface CreateProviderApplicationRequest {
   businessName: string;
   description: string;
@@ -158,7 +167,7 @@ export interface CreateProviderApplicationRequest {
   cacNumber: string;
   cacDocumentUrl?: string;
 }
- 
+
 export interface CreateExperienceRequest {
   title: string;
   description: string;
@@ -174,30 +183,39 @@ export interface CreateExperienceRequest {
   featured?: boolean;
   status?: "draft" | "published";
 }
- 
+
 export type UpdateExperienceRequest = Partial<
-  Omit<CreateExperienceRequest,"numberOfDays"> & {
+  Omit<CreateExperienceRequest, "numberOfDays"> & {
     numberOfDays: number;
     status: ExperienceStatus;
   }
 >;
- 
+
 export interface CreateDestinationRequest {
   name: string;
   state: string;
   description: string;
   imageUrl: string;
   featured?: boolean;
-  destinationSlug?: string;
+  slug?: string;
 }
- 
+
 export interface CreateBookingRequest {
   experienceId: string;
   requestedDate: string;
   groupSize: number;
   notes?: string;
 }
- 
+
+export interface RecommendExperiencesRequest {
+  slug: string;
+  prompt: string;
+}
+
+export interface RecommendExperiencesResponse {
+  recommended: Experience[];
+}
+
 export interface ExperienceQueryParams {
   destination?: string;
   category?: ExperienceCategory;
@@ -208,20 +226,19 @@ export interface ExperienceQueryParams {
   limit?: number;
   cursor?: string;
 }
- 
+
 export interface ApiSuccess<T> {
   success: true;
   data: T;
 }
- 
+
 export interface ApiError {
   success: false;
   message: string;
   errors?: Record<string, string[]>;
 }
- 
+
 export interface ReviewProviderApplicationRequest {
   status: "approved" | "rejected";
   rejectionReason?: string;
 }
- 

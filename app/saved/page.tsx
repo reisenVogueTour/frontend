@@ -12,9 +12,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-lagos-kayak",
     providerId: "prov-1",
     title: "Kayaking in Lagos Lagoons",
-    description: "Paddle through Lagos's beautiful lagoons, navigating around fishing communities and catching a breathtaking view of the Lekki-Ikoyi Bridge.",
+    description:
+      "Paddle through Lagos's beautiful lagoons, navigating around fishing communities and catching a breathtaking view of the Lekki-Ikoyi Bridge.",
     destination: "Lagos",
-    destinationSlug: "lagos",
+    slug: "lagos",
     category: "adventure",
     eventDate: "2026-08-10T09:00:00.000Z",
     numberOfDays: 1,
@@ -30,9 +31,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-tokyo-vinyl",
     providerId: "prov-2",
     title: "Tokyo Vinyl & Slow Coffee Tour",
-    description: "Dive deep into the historic record shops of Shimokitazawa and enjoy pour-over coffee at tucked-away kissatens with a local music collector.",
+    description:
+      "Dive deep into the historic record shops of Shimokitazawa and enjoy pour-over coffee at tucked-away kissatens with a local music collector.",
     destination: "Tokyo",
-    destinationSlug: "tokyo",
+    slug: "tokyo",
     category: "cultural",
     eventDate: "2026-09-15T10:00:00.000Z",
     numberOfDays: 1,
@@ -48,9 +50,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-paris-art",
     providerId: "prov-3",
     title: "Montmartre Hidden Art Studios",
-    description: "Walk inside the private ateliers where modern art was born. Meet working printmakers and paint on canvas overlooking the city.",
+    description:
+      "Walk inside the private ateliers where modern art was born. Meet working printmakers and paint on canvas overlooking the city.",
     destination: "Paris",
-    destinationSlug: "paris",
+    slug: "paris",
     category: "romantic",
     eventDate: "2026-07-20T14:00:00.000Z",
     numberOfDays: 1,
@@ -66,9 +69,10 @@ const MOCK_EXPERIENCES: Experience[] = [
     experienceId: "exp-london-punk",
     providerId: "prov-4",
     title: "East London Street Art & Punk History",
-    description: "Explore the rebellious roots of Camden and Shoreditch, following punk lore and identifying hidden masterpieces by street legends.",
+    description:
+      "Explore the rebellious roots of Camden and Shoreditch, following punk lore and identifying hidden masterpieces by street legends.",
     destination: "London",
-    destinationSlug: "london",
+    slug: "london",
     category: "nightlife",
     eventDate: "2026-08-25T18:00:00.000Z",
     numberOfDays: 1,
@@ -83,7 +87,8 @@ const MOCK_EXPERIENCES: Experience[] = [
 ];
 
 export default function SavedPage() {
-  const { token, toggleSaveExperience, savedIds, syncSavedWithBackend } = useApp();
+  const { token, toggleSaveExperience, savedIds, syncSavedWithBackend } =
+    useApp();
   const router = useRouter();
 
   const [savedExperiences, setSavedExperiences] = useState<Experience[]>([]);
@@ -103,14 +108,16 @@ export default function SavedPage() {
       try {
         await syncSavedWithBackend();
         const data = await fetchAPI<Experience[]>("/api/saved");
-        
+
         // Merge with local mock experiences if savedIds has elements not returned by the API
         const apiIds = new Set(data.map((item) => item.experienceId));
         const mergedList = [...data];
 
         savedIds.forEach((id) => {
           if (!apiIds.has(id)) {
-            const mockExp = MOCK_EXPERIENCES.find((exp) => exp.experienceId === id);
+            const mockExp = MOCK_EXPERIENCES.find(
+              (exp) => exp.experienceId === id,
+            );
             if (mockExp) {
               mergedList.push(mockExp);
             }
@@ -121,7 +128,9 @@ export default function SavedPage() {
       } catch (err) {
         console.error("Failed to load saved experiences from API:", err);
         // Fallback to local mock filtering based on savedIds
-        const localSaved = MOCK_EXPERIENCES.filter((exp) => savedIds.includes(exp.experienceId));
+        const localSaved = MOCK_EXPERIENCES.filter((exp) =>
+          savedIds.includes(exp.experienceId),
+        );
         setSavedExperiences(localSaved);
       } finally {
         setLoading(false);
@@ -136,7 +145,9 @@ export default function SavedPage() {
     e.stopPropagation();
     try {
       await toggleSaveExperience(id);
-      setSavedExperiences((prev) => prev.filter((item) => item.experienceId !== id));
+      setSavedExperiences((prev) =>
+        prev.filter((item) => item.experienceId !== id),
+      );
     } catch (err: any) {
       alert(err.message || "Failed to remove saved experience.");
     }
@@ -150,10 +161,16 @@ export default function SavedPage() {
           Please login or register to save your favorite local experiences.
         </p>
         <div className="flex gap-4 mt-2">
-          <Link href="/login" className="bg-secondary text-white-base px-6 py-3 rounded-full font-bold text-small">
+          <Link
+            href="/login"
+            className="bg-secondary text-white-base px-6 py-3 rounded-full font-bold text-small"
+          >
             Login
           </Link>
-          <Link href="/register" className="border border-primary text-dark-base px-6 py-3 rounded-full font-medium text-small hover:bg-primary-50">
+          <Link
+            href="/register"
+            className="border border-primary text-dark-base px-6 py-3 rounded-full font-medium text-small hover:bg-primary-50"
+          >
             Register
           </Link>
         </div>
@@ -172,7 +189,9 @@ export default function SavedPage() {
   return (
     <div className="w-full max-w-400 mx-auto px-5 lg:px-10 pb-20 pt-24 lg:pt-32">
       <div className="mb-10 text-center lg:text-left">
-        <h1 className="text-section-title text-dark-base mb-2">Saved Experiences</h1>
+        <h1 className="text-section-title text-dark-base mb-2">
+          Saved Experiences
+        </h1>
         <p className="text-body-medium text-body-dark">
           Your personal wishlist of matching tours and local activities.
         </p>
@@ -180,9 +199,12 @@ export default function SavedPage() {
 
       {savedExperiences.length === 0 ? (
         <div className="text-center py-20 bg-white-base border border-body-off rounded-[28px] p-10 flex flex-col items-center justify-center gap-4">
-          <span className="text-section-inner-title text-body-dark">Your wishlist is empty</span>
+          <span className="text-section-inner-title text-body-dark">
+            Your wishlist is empty
+          </span>
           <p className="text-body-medium text-body-dark max-w-sm">
-            Browse through our destinations and click the heart icon on any experience to save it here.
+            Browse through our destinations and click the heart icon on any
+            experience to save it here.
           </p>
           <Link href="/experiences" className="primary-cta cursor-pointer mt-2">
             <span className="primary-cta-inner">Explore Experiences</span>
@@ -191,7 +213,8 @@ export default function SavedPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {savedExperiences.map((exp, index) => {
-            const tiltClass = index % 2 === 0 ? "hover:rotate-1" : "hover:-rotate-1";
+            const tiltClass =
+              index % 2 === 0 ? "hover:rotate-1" : "hover:-rotate-1";
 
             return (
               <Link
@@ -200,7 +223,12 @@ export default function SavedPage() {
                 className={`group relative flex flex-col justify-end p-5 lg:p-6 border-2 border-primary rounded-[28px] bg-[url('/noise.svg')] bg-cover w-full h-90 bg-center overflow-hidden hover:shadow-lg transition-all duration-300 ${tiltClass}`}
               >
                 {/* Background image overlay */}
-                <div className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${exp.images && exp.images[0] ? exp.images[0] : "/experience_placeholder.jpg"}')` }} />
+                <div
+                  className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                  style={{
+                    backgroundImage: `url('${exp.images && exp.images[0] ? exp.images[0] : "/experience_placeholder.jpg"}')`,
+                  }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-dark-base via-dark-base/40 to-transparent opacity-85 z-1" />
 
                 {/* Remove button */}
@@ -209,8 +237,19 @@ export default function SavedPage() {
                   className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white-base/90 text-error hover:bg-white-base hover:scale-110 shadow transition-all cursor-pointer"
                   aria-label="Remove experience from saved"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.5"
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
 

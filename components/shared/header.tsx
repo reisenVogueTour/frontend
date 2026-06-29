@@ -2,35 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  clearAuthSession,
-  getStoredToken,
-  subscribeToAuthSessionChange,
-} from "@/lib/auth-client";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthSession } from "@/lib/hooks/use-auth-session";
+import HeaderAuthActions from "./headerAuthActions";
 
 export default function Header() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    function syncAuthState() {
-      setIsLoggedIn(Boolean(getStoredToken()));
-    }
-
-    void Promise.resolve().then(() => {
-      syncAuthState();
-    });
-
-    return subscribeToAuthSessionChange(syncAuthState);
-  }, []);
+  const pathname = usePathname();
+  const { isLoggedIn, logout } = useAuthSession();
 
   function handleLogout() {
-    clearAuthSession();
-    setIsLoggedIn(false);
+    logout();
     router.push("/");
   }
+
+  if (pathname?.startsWith("/ai-recommendations")) return null;
 
   return (
     <header className="absolute top-0 left-0 z-50 w-full flex justify-center">
@@ -38,24 +24,14 @@ export default function Header() {
         <nav className="flex items-center justify-between gap-4">
           <Link href="/">
             <Image
-              className="w-24 h-auto lg:w-28"
+              className="w-24 h-auto lg:w-28 flex-none"
               src="/logo.svg"
               alt="Reisen Logo"
               height={32}
               width={113}
             />
           </Link>
-          {isLoggedIn ? (
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-dark-base shadow-sm transition hover:bg-primary/90"
-              >
-                Logout
-              </button>
-            </div>
-          ) : null}
+          <HeaderAuthActions isLoggedIn={isLoggedIn} onLogout={handleLogout} />
         </nav>
       </div>
     </header>
