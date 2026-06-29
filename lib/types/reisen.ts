@@ -30,7 +30,7 @@ export interface Experience {
   title: string;
   description: string;
   destination: string;
-  slug: string;
+  destinationSlug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
@@ -209,7 +209,7 @@ export type UpdateExperienceRequest = Partial<
 
 export interface CreateDestinationRequest {
   name: string;
-  state: string;
+  country: string;
   description: string;
   imageUrl: string;
   featured?: boolean;
@@ -224,7 +224,7 @@ export interface CreateBookingRequest {
 }
 
 export interface RecommendExperiencesRequest {
-  slug: string;
+  destinationSlug: string;
   prompt: string;
 }
 
@@ -257,4 +257,16 @@ export interface ApiError {
 export interface ReviewProviderApplicationRequest {
   status: 'approved' | 'rejected';
   rejectionReason?: string;
+}
+
+export interface GenerateItineraryRequest {
+  destinationSlug: string;
+  prompt: string;
+  experienceIds: string[];
+  durationValue: number;
+  durationUnit: "hours" | "days" | "weeks" | "months";
+}
+
+export interface SaveItineraryRequest extends GenerateItineraryRequest {
+  start?: boolean;
 }

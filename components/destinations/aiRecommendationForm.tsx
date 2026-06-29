@@ -80,7 +80,7 @@ export default function AiRecommendationForm({ slug }: { slug: string }) {
 
     try {
       const { recommended } = await experiencesApi.recommendations(
-        { slug: slug, prompt: trimmed },
+        { destinationSlug: slug, prompt: trimmed },
         controller.signal,
       );
 

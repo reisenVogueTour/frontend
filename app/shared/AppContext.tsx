@@ -30,7 +30,7 @@ export interface Experience {
   title: string;
   description: string;
   destination: string;
-  slug: string;
+  destinationSlug: string;
   category: ExperienceCategory;
   eventDate: string;
   numberOfDays: number;
