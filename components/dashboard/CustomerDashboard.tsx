@@ -433,8 +433,8 @@ export default function CustomerDashboard() {
           {/* Welcome header */}
           <div className="fade-in-up flex items-center justify-between gap-8 flex-wrap">
             <div className="flex-1 min-w-65">
-              <h1 className="text-2xl font-bold mb-2 text-dark-base">Your dashboard</h1>
-              <div className="flex items-center gap-1.5 text-secondary text-small-medium mb-1">
+              <h1 className="text-section-title text-dark-base">Your dashboard</h1>
+              <div className="flex items-center gap-1.5 text-secondary text-small-medium my-2">
                 <Sparkles size={14} className="float-slow" />
                 <span>{getGreeting()}{user?.firstName ? `, ${user.firstName}` : ""} — ready for your next trip?</span>
               </div>
@@ -444,7 +444,7 @@ export default function CustomerDashboard() {
             <div className="relative w-full max-w-70 h-32 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1518544866330-95a16abae5e8?w=400&q=80"
+                src="https://6a3ef2cd424f14ba7961456f.imgix.net/diani2.webp"
                 alt="Beach destination"
                 className="absolute left-0 top-2 w-28 h-24 rounded-2xl object-cover shadow-[0px_8px_20px_0px_rgba(127,92,204,0.25)] rotate-6 border-4 border-white-base"
               />
