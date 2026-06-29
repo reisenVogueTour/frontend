@@ -18,9 +18,7 @@ export function subscribeToAuthSessionChange(callback: () => void) {
   };
 }
 
-export function getDashboardPath() {
-  return "/dashboard";
-}
+
 
 export function getStoredUser(): PublicUser | null {
   if (typeof window === "undefined") return null;
@@ -52,6 +50,21 @@ export function clearAuthSession() {
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
   notifyAuthSessionChanged();
+}
+
+export function getDashboardPath() {
+  const user = getStoredUser();
+
+  if (!user) return "/auth";
+
+  switch (user.role) {
+    case "provider":
+      return "/dashboard/provider";
+    case "admin":
+      return "/dashboard/admin";
+    default:
+      return "/dashboard";
+  }
 }
 
 export function getStoredDashboardPath() {
