@@ -31,12 +31,20 @@ const roleOptions: Array<{ label: string; value: Exclude<UserRole, "admin"> }> =
 const preferredCountries: CountryIso2[] = ["ng", "gh", "ke", "za", "gb", "us"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function getPostAuthPath(): string {
+function getPostAuthPath(role?: UserRole): string {
   if (typeof window === "undefined") return "/";
 
   const next = new URLSearchParams(window.location.search).get("next");
 
   if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+
+  // Redirect based on role
+  if (role === "provider") {
+    return "/provider";
+  }
+  if (role === "admin") {
+    return "/admin";
+  }
 
   return "/";
 }
@@ -115,7 +123,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         });
         storeAuthSession(auth);
         setMessage("Account created. Redirecting...");
-        router.replace(getPostAuthPath());
+        router.replace(getPostAuthPath(role));
         return;
       }
 
@@ -125,7 +133,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
       });
       storeAuthSession(auth);
       setMessage("You're logged in. Redirecting...");
-      router.replace(getPostAuthPath());
+      router.replace(getPostAuthPath(auth.user.role));
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Authentication failed",

@@ -15,6 +15,13 @@ import {
   Sparkles,
   Clock,
   X,
+  Filter,
+  Package,
+  Calendar as CalendarIcon,
+  TrendingUp,
+  Mail,
+  Phone as PhoneIcon,
+  User as UserIcon,
 } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api-client";
 import type {
@@ -108,10 +115,13 @@ function StatusBadge({ status }: { status: BookingStatus }) {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, icon: Icon, colorClass }: { label: string; value: number; icon?: typeof Package; colorClass?: string }) {
   return (
-    <div className="flex-1 min-w-[150px] rounded-3xl bg-white-base border border-body-off p-5">
-      <div className="text-small text-body-dark mb-1">{label}</div>
+    <div className="flex-1 min-w-[150px] rounded-3xl bg-white-base border border-body-off p-5 hover:shadow-lg transition-shadow">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-small text-body-dark">{label}</div>
+        {Icon && <Icon size={18} className={colorClass || "text-secondary"} />}
+      </div>
       <div className="text-section-title text-dark-base">{value}</div>
     </div>
   );
@@ -170,8 +180,17 @@ function ExperienceRow({
         : "text-body-dark bg-body-off";
 
   return (
-    <div className="fade-in-up flex items-center justify-between gap-4 flex-wrap rounded-2xl border border-body-off bg-white-base p-5 hover:border-primary transition-colors">
-      <div className="min-w-0">
+    <div className="fade-in-up flex items-center gap-4 flex-wrap rounded-2xl border border-body-off bg-white-base p-5 hover:border-primary hover:shadow-md transition-all">
+      {experience.images && experience.images.length > 0 && (
+        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+          <img
+            src={experience.images[0]}
+            alt={experience.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
         <div className="text-body-medium text-dark-base mb-1.5">
           {experience.title}
         </div>
@@ -198,7 +217,7 @@ function ExperienceRow({
         <button
           onClick={() => onEdit(experience)}
           aria-label="Edit experience"
-          className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center hover:scale-110 transition-transform"
+          className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center hover:scale-110 transition-transform z-10"
         >
           <Pencil size={14} className="text-secondary" />
         </button>
@@ -501,34 +520,86 @@ function ProviderBookingRow({
   onUpdateStatus: (id: string, status: BookingStatus) => void;
 }) {
   return (
-    <div className="fade-in-up flex items-center justify-between gap-4 flex-wrap rounded-2xl border border-body-off bg-white-base p-5">
-      <div className="min-w-0">
-        <div className="text-body-medium text-dark-base mb-1.5">
-          {booking.experienceTitle}
+    <div className="fade-in-up rounded-2xl border border-body-off bg-white-base p-5 hover:border-primary hover:shadow-md transition-all">
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Package size={16} className="text-secondary" />
+            <div className="text-body-medium text-dark-base">
+              {booking.experienceTitle}
+            </div>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap text-extra-small text-body-dark">
+            <span className="flex items-center gap-1">
+              <CalendarIcon size={13} /> {formatDate(booking.requestedDate)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users size={13} /> {booking.groupSize} guests
+            </span>
+            <span className="font-medium text-dark-base">
+              {formatPrice(booking.totalPrice, booking.currency)}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-4 flex-wrap text-extra-small text-body-dark">
-          <span className="flex items-center gap-1">
-            <Calendar size={13} /> {formatDate(booking.requestedDate)}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users size={13} /> {booking.groupSize}
-          </span>
-          <span>{formatPrice(booking.totalPrice, booking.currency)}</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
         <StatusBadge status={booking.status} />
+      </div>
+
+      {booking.customer && (
+        <div className="rounded-xl bg-primary-50 p-3 mb-3">
+          <div className="flex items-center gap-1.5 text-small-medium text-secondary mb-2">
+            <UserIcon size={14} />
+            <span>Customer details</span>
+          </div>
+          <div className="flex flex-col gap-1.5 text-extra-small text-body-dark">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-dark-base">
+                {booking.customer.firstName} {booking.customer.lastName}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Mail size={13} />
+              <a
+                href={`mailto:${booking.customer.email}`}
+                className="hover:text-secondary transition-colors"
+              >
+                {booking.customer.email}
+              </a>
+            </div>
+            {booking.customer.phone && (
+              <div className="flex items-center gap-1.5">
+                <PhoneIcon size={13} />
+                <a
+                  href={`tel:${booking.customer.phone}`}
+                  className="hover:text-secondary transition-colors"
+                >
+                  {booking.customer.phone}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {booking.notes && (
+        <div className="mb-3 p-3 rounded-xl bg-body-light">
+          <div className="text-extra-small text-body-dark">
+            <span className="font-medium text-dark-base">Notes:</span> {booking.notes}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 flex-wrap">
         {booking.status === "pending" && (
           <>
             <button
               onClick={() => onUpdateStatus(booking.bookingId, "confirmed")}
-              className="rounded-full bg-success/10 text-success px-3.5 py-1.5 text-small-medium hover:bg-success/20 transition-colors"
+              className="rounded-full bg-success/10 text-success px-3.5 py-1.5 text-small-medium hover:bg-success/20 transition-colors z-10"
             >
               Confirm
             </button>
             <button
               onClick={() => onUpdateStatus(booking.bookingId, "cancelled")}
-              className="rounded-full bg-error/10 text-error px-3.5 py-1.5 text-small-medium hover:bg-error/20 transition-colors"
+              className="rounded-full bg-error/10 text-error px-3.5 py-1.5 text-small-medium hover:bg-error/20 transition-colors z-10"
             >
               Decline
             </button>
@@ -537,7 +608,7 @@ function ProviderBookingRow({
         {booking.status === "confirmed" && (
           <button
             onClick={() => onUpdateStatus(booking.bookingId, "completed")}
-            className="rounded-full bg-info/10 text-info px-3.5 py-1.5 text-small-medium hover:bg-info/20 transition-colors"
+            className="rounded-full bg-info/10 text-info px-3.5 py-1.5 text-small-medium hover:bg-info/20 transition-colors z-10"
           >
             Mark completed
           </button>
@@ -593,6 +664,7 @@ export default function ProviderDashboard() {
   const [editingExperience, setEditingExperience] = useState<
     Experience | "new" | null
   >(null);
+  const [bookingFilter, setBookingFilter] = useState<string>("all");
 
   async function load() {
     setStatus("loading");
@@ -650,7 +722,7 @@ export default function ProviderDashboard() {
 
       {status === "ready" && data && data.applicationStatus === "approved" && (
         <div className="w-full max-w-240 mx-auto flex flex-col gap-8">
-          <div className="fade-in-up flex items-center justify-between flex-wrap gap-4">
+          <div className="fade-in-up flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div>
               <div className="flex items-center gap-1.5 text-secondary text-small-medium mb-1">
                 <Sparkles size={14} />
@@ -662,9 +734,9 @@ export default function ProviderDashboard() {
             </div>
             <button
               onClick={() => setEditingExperience("new")}
-              className="primary-cta"
+              className="primary-cta relative z-20 w-full sm:w-auto"
             >
-              <span className="primary-cta-inner !py-2.5 !px-6 flex items-center gap-2 text-dark-base">
+              <span className="primary-cta-inner !py-2.5 !px-6 flex items-center justify-center gap-2 text-dark-base">
                 <Plus size={16} /> New experience
               </span>
             </button>
@@ -674,15 +746,26 @@ export default function ProviderDashboard() {
             <StatCard
               label="Total experiences"
               value={data.stats.totalExperiences}
+              icon={Package}
+              colorClass="text-secondary"
             />
             <StatCard
               label="Published"
               value={data.stats.publishedExperiences}
+              icon={CheckCircle2}
+              colorClass="text-success"
             />
-            <StatCard label="Drafts" value={data.stats.draftExperiences} />
+            <StatCard 
+              label="Drafts" 
+              value={data.stats.draftExperiences} 
+              icon={Pencil}
+              colorClass="text-warning"
+            />
             <StatCard
               label="Pending bookings"
               value={data.stats.pendingBookings}
+              icon={CalendarIcon}
+              colorClass="text-info"
             />
           </div>
 
@@ -732,18 +815,55 @@ export default function ProviderDashboard() {
 
           {tab === "bookings" && (
             <section className="flex flex-col gap-3">
-              {data.recentBookings.length === 0 ? (
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2 rounded-full bg-primary-50 p-1.5">
+                  <button
+                    onClick={() => setBookingFilter("all")}
+                    className={`rounded-full px-4 py-1.5 text-small-medium transition-colors ${
+                      bookingFilter === "all"
+                        ? "bg-white-base text-dark-base shadow-sm"
+                        : "text-body-dark hover:text-dark-base"
+                    }`}
+                  >
+                    All bookings
+                  </button>
+                  {data.experiences.map((exp) => (
+                    <button
+                      key={exp.experienceId}
+                      onClick={() => setBookingFilter(exp.experienceId)}
+                      className={`rounded-full px-4 py-1.5 text-small-medium transition-colors ${
+                        bookingFilter === exp.experienceId
+                          ? "bg-white-base text-dark-base shadow-sm"
+                          : "text-body-dark hover:text-dark-base"
+                      }`}
+                    >
+                      {exp.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {data.recentBookings.filter(
+                bookingFilter === "all" 
+                  ? () => true 
+                  : (b) => b.experienceId === bookingFilter
+              ).length === 0 ? (
                 <div className="fade-in-up rounded-3xl border border-dashed border-body-off p-10 text-center text-body-dark text-body-regular">
-                  No bookings yet.
+                  {bookingFilter === "all" ? "No bookings yet." : "No bookings for this experience."}
                 </div>
               ) : (
-                data.recentBookings.map((b) => (
-                  <ProviderBookingRow
-                    key={b.bookingId}
-                    booking={b}
-                    onUpdateStatus={handleUpdateBookingStatus}
-                  />
-                ))
+                data.recentBookings
+                  .filter(
+                    bookingFilter === "all" 
+                      ? () => true 
+                      : (b) => b.experienceId === bookingFilter
+                  )
+                  .map((b) => (
+                    <ProviderBookingRow
+                      key={b.bookingId}
+                      booking={b}
+                      onUpdateStatus={handleUpdateBookingStatus}
+                    />
+                  ))
               )}
             </section>
           )}

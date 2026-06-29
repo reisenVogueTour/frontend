@@ -11,16 +11,19 @@ import {
   Compass,
   AlertTriangle,
   MapPinned,
+  X,
+  CheckCircle2,
 } from "lucide-react";
 import {
   experiencesApi,
   providersApi,
+  bookingsApi,
   ApiRequestError,
 } from "@/lib/api-client";
 import { formatPrice, formatEventDate } from "@/lib/format";
 import ExperienceCard from "@/components/experiences/experienceCard";
 import SaveButton from "@/components/experiences/saveButton";
-import type { Experience, PublicProvider } from "@/lib/types/reisen";
+import type { Experience, PublicProvider, CreateBookingRequest } from "@/lib/types/reisen";
 
 const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY;
 const RELATED_LIMIT = 4;
@@ -50,6 +53,155 @@ function ProviderMap({ location }: { location: string }) {
   );
 }
 
+function BookingModal({
+  experience,
+  onClose,
+  onSuccess,
+}: {
+  experience: Experience;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [form, setForm] = useState({
+    requestedDate: "",
+    groupSize: 1,
+    notes: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+
+    const bookingData: CreateBookingRequest = {
+      experienceId: experience.experienceId,
+      requestedDate: new Date(form.requestedDate).toISOString(),
+      groupSize: form.groupSize,
+      notes: form.notes.trim() || undefined,
+    };
+
+    try {
+      await bookingsApi.create(bookingData);
+      setSuccess(true);
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 1500);
+    } catch (err) {
+      setError(
+        err instanceof ApiRequestError
+          ? err.message
+          : "Failed to create booking. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white-base rounded-3xl p-8 w-full max-w-md text-center">
+          <CheckCircle2 size={48} className="text-success mx-auto mb-4" />
+          <h3 className="text-section-inner-title text-dark-base mb-2">
+            Booking Requested!
+          </h3>
+          <p className="text-body-regular text-body-dark">
+            Your booking request has been sent to the provider. You'll be notified
+            once it's confirmed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white-base rounded-3xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-section-inner-title text-dark-base">
+            Request booking
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center"
+          >
+            <X size={16} className="text-body-dark" />
+          </button>
+        </div>
+
+        <div className="mb-4 p-4 rounded-2xl bg-primary-50">
+          <p className="text-body-medium text-dark-base">{experience.title}</p>
+          <p className="text-small text-body-dark">
+            {formatPrice(experience.price, experience.currency)} / person
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-small-medium text-body-dark">Requested date</span>
+            <input
+              type="date"
+              value={form.requestedDate}
+              onChange={(e) => setForm({ ...form, requestedDate: e.target.value })}
+              required
+              min={new Date().toISOString().split("T")[0]}
+              className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-small-medium text-body-dark">Group size</span>
+            <input
+              type="number"
+              min={1}
+              max={experience.maxGroupSize}
+              value={form.groupSize}
+              onChange={(e) => setForm({ ...form, groupSize: Number(e.target.value) })}
+              required
+              className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
+            />
+            <span className="text-extra-small text-body-dark">
+              Max: {experience.maxGroupSize} people
+            </span>
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-small-medium text-body-dark">Notes (optional)</span>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={3}
+              placeholder="Any special requests or questions..."
+              className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary resize-none"
+            />
+          </label>
+
+          {error && <p className="text-small text-error">{error}</p>}
+
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-body-medium text-dark-base">
+              Total: {formatPrice(experience.price * form.groupSize, experience.currency)}
+            </p>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="primary-cta"
+            >
+              <span className="primary-cta-inner !py-2.5 !px-6 text-dark-base">
+                {submitting ? "Submitting..." : "Confirm request"}
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function ExperienceDetail({
   experienceId,
 }: {
@@ -65,6 +217,7 @@ export default function ExperienceDetail({
 
   const [activeImage, setActiveImage] = useState(0);
   const [related, setRelated] = useState<Experience[]>([]);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -194,7 +347,11 @@ export default function ExperienceDetail({
                   </div>
                 )}
 
-                <button type="button" className="primary-cta cursor-pointer">
+                <button
+                  type="button"
+                  onClick={() => setShowBookingModal(true)}
+                  className="primary-cta cursor-pointer relative z-20"
+                >
                   <span className="primary-cta-inner block w-full text-dark-base">
                     Request booking
                   </span>
@@ -292,6 +449,16 @@ export default function ExperienceDetail({
             </div>
           </div>
         </section>
+      )}
+
+      {showBookingModal && experience && (
+        <BookingModal
+          experience={experience}
+          onClose={() => setShowBookingModal(false)}
+          onSuccess={() => {
+            // Optionally refresh data or show success message
+          }}
+        />
       )}
     </>
   );

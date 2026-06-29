@@ -60,6 +60,13 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   destination?: string;
+  customer?: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+  };
 }
 
 export interface Provider {
