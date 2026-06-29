@@ -8,7 +8,7 @@ import {
   Clock,
   Users,
   Calendar,
-  Compass,
+  ImageIcon,
   AlertTriangle,
   MapPinned,
   X,
@@ -23,7 +23,11 @@ import {
 import { formatPrice, formatEventDate } from "@/lib/format";
 import ExperienceCard from "@/components/experiences/experienceCard";
 import SaveButton from "@/components/experiences/saveButton";
-import type { Experience, PublicProvider, CreateBookingRequest } from "@/lib/types/reisen";
+import type {
+  Experience,
+  PublicProvider,
+  CreateBookingRequest,
+} from "@/lib/types/reisen";
 
 const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY;
 const RELATED_LIMIT = 4;
@@ -94,7 +98,7 @@ function BookingModal({
       setError(
         err instanceof ApiRequestError
           ? err.message
-          : "Failed to create booking. Please try again."
+          : "Failed to create booking. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -110,8 +114,8 @@ function BookingModal({
             Booking Requested!
           </h3>
           <p className="text-body-regular text-body-dark">
-            Your booking request has been sent to the provider. You'll be notified
-            once it's confirmed.
+            Your booking request has been sent to the provider. You'll be
+            notified once it's confirmed.
           </p>
         </div>
       </div>
@@ -142,11 +146,15 @@ function BookingModal({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-small-medium text-body-dark">Requested date</span>
+            <span className="text-small-medium text-body-dark">
+              Requested date
+            </span>
             <input
               type="date"
               value={form.requestedDate}
-              onChange={(e) => setForm({ ...form, requestedDate: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, requestedDate: e.target.value })
+              }
               required
               min={new Date().toISOString().split("T")[0]}
               className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
@@ -160,7 +168,9 @@ function BookingModal({
               min={1}
               max={experience.maxGroupSize}
               value={form.groupSize}
-              onChange={(e) => setForm({ ...form, groupSize: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({ ...form, groupSize: Number(e.target.value) })
+              }
               required
               className="rounded-xl border border-body-off px-3.5 py-2.5 text-body-regular text-dark-base outline-none focus:border-primary"
             />
@@ -170,7 +180,9 @@ function BookingModal({
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-small-medium text-body-dark">Notes (optional)</span>
+            <span className="text-small-medium text-body-dark">
+              Notes (optional)
+            </span>
             <textarea
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -184,13 +196,13 @@ function BookingModal({
 
           <div className="flex items-center justify-between pt-2">
             <p className="text-body-medium text-dark-base">
-              Total: {formatPrice(experience.price * form.groupSize, experience.currency)}
+              Total:{" "}
+              {formatPrice(
+                experience.price * form.groupSize,
+                experience.currency,
+              )}
             </p>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="primary-cta"
-            >
+            <button type="submit" disabled={submitting} className="primary-cta">
               <span className="primary-cta-inner !py-2.5 !px-6 text-dark-base">
                 {submitting ? "Submitting..." : "Confirm request"}
               </span>
@@ -317,7 +329,7 @@ export default function ExperienceDetail({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-primary-50">
-                      <Compass size={40} className="text-dark-base" />
+                      <ImageIcon size={40} className="text-dark-base/70" />
                     </div>
                   )}
                 </div>

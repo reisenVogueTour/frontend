@@ -256,7 +256,7 @@ export default function DestinationResults({ slug }: DestinationResultsProps) {
           <div className="absolute inset-0 animate-pulse bg-primary-50" />
         )}
 
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/40" />
 
         <h1 className="relative z-10 flex items-center gap-2 text-section-title text-white-base">
           <MapPin size={28} className="shrink-0" />

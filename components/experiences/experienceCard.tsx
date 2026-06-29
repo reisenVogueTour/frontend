@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Compass, Sparkles, Clock } from "lucide-react";
+import { MapPin, Compass, Sparkles, Clock, ImageIcon } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import SaveButton from "@/components/experiences/saveButton";
 import type { Experience } from "@/lib/types/reisen";
@@ -26,8 +26,8 @@ export default function ExperienceCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center cta-gradient">
-            <Compass size={32} className="text-white-base/70" />
+          <div className="flex h-full w-full items-center justify-center bg-primary-50/50">
+            <ImageIcon size={32} className="text-dark-base/70" />
           </div>
         )}
 
