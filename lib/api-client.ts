@@ -28,6 +28,13 @@ import type {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
+interface UploadSignResponse {
+  timestamp: number;
+  signature: string;
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+}
 export class ApiRequestError extends Error {
   status: number;
   errors?: Record<string, string[]>;
@@ -280,6 +287,12 @@ export const adminApi = {
   getApplication: (providerId: string) =>
     apiFetch<Provider>(`/api/admin/providers/applications/${providerId}`),
 
+  deleteProvider: (providerId: string) =>
+    apiFetch<{ deleted: boolean }>(
+      `/api/admin/providers/applications/${providerId}`,
+      { method: "DELETE" },
+    ),
+
   reviewApplication: (
     providerId: string,
     body: ReviewProviderApplicationRequest,
@@ -293,6 +306,11 @@ export const adminApi = {
     ),
 };
 
+// ---------- Uploads ----------
+export const uploadsApi = {
+  sign: () => apiFetch<UploadSignResponse>("/api/uploads/sign", { method: "POST" }),
+};
+
 export const api = {
   ...authApi,
   ...usersApi,
@@ -302,4 +320,5 @@ export const api = {
   saved: savedApi,
   providers: providersApi,
   admin: adminApi,
+  uploads: uploadsApi, 
 };

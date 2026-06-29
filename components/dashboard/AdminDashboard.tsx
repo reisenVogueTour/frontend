@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
+  Trash2,
 } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api-client";
 import type {
@@ -172,17 +173,53 @@ function RejectModal({
     </div>
   );
 }
-
+//0----------------Confirm delete modal----------------
+function ConfirmDeleteModal({
+  provider,
+  onClose,
+  onConfirm,
+}: {
+  provider: Provider;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-dark-base/50 flex items-center justify-center z-50 p-4">
+      <div className="fade-in-up bg-white-base rounded-3xl p-6 w-full max-w-md">
+        <h3 className="text-section-inner-title text-dark-base mb-1">Delete provider</h3>
+        <p className="text-small text-body-dark mb-6">
+          Permanently delete <strong>{provider.businessName}</strong>? This cannot be undone.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-full border border-body-off py-2.5 text-small-medium text-body-dark hover:bg-body-light transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 rounded-full bg-error text-white-base py-2.5 text-small-medium hover:opacity-90 transition-opacity"
+          >
+            Delete permanently
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 // ---------- Application card ----------
 
 function ApplicationCard({
   provider,
   onApprove,
   onReject,
+  onDelete,
 }: {
   provider: Provider;
   onApprove: (p: Provider) => void;
   onReject:  (p: Provider) => void;
+  onDelete: (p: Provider) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -223,6 +260,13 @@ function ApplicationCard({
               </button>
             </>
           )}
+		  <button
+            onClick={() => onDelete(provider)}
+            aria-label="Delete provider"
+            className="w-9 h-9 rounded-full bg-error/10 flex items-center justify-center hover:bg-error/20 transition-colors"
+          >
+			<Trash2 size={15} className="text-error" />
+		  </button>
           <button
             onClick={() => setExpanded((v) => !v)}
             aria-label={expanded ? "Collapse details" : "Expand details"}
@@ -337,6 +381,7 @@ export default function AdminDashboard() {
   const [errorMsg, setErrorMsg]       = useState("");
   const [rejectTarget, setRejectTarget] = useState<Provider | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Provider | null>(null);
 
   async function loadSummary() {
     setStatus("loading");
@@ -349,6 +394,21 @@ export default function AdminDashboard() {
       setStatus("error");
     }
   }
+
+  async function handleDeleteConfirm() {
+	if (!deleteTarget) return;
+	const target = deleteTarget;
+	setDeleteTarget(null);
+	setActionLoading(target.providerId);
+	try {
+		await api.admin.deleteProvider(target.providerId);
+		await Promise.all([loadSummary(), loadTab(activeTab)]);
+	} catch {
+		// could toast here
+	} finally {
+		setActionLoading(null);
+	}
+	}
 
   async function loadTab(tab: Tab) {
     setLoadingTab(true);
@@ -453,6 +513,7 @@ export default function AdminDashboard() {
                     provider={p}
                     onApprove={handleApprove}
                     onReject={setRejectTarget}
+					onDelete={setDeleteTarget}
                   />
                 </div>
               ))
@@ -466,6 +527,14 @@ export default function AdminDashboard() {
           provider={rejectTarget}
           onClose={() => setRejectTarget(null)}
           onConfirm={handleRejectConfirm}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDeleteModal
+          provider={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteConfirm}
         />
       )}
     </div>
